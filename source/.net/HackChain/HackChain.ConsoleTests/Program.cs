@@ -2,6 +2,7 @@
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Math.EC;
+using System.Text;
 
 namespace HackChain.ConsoleTests
 {
@@ -9,44 +10,51 @@ namespace HackChain.ConsoleTests
     {
         public static void Main(string[] args)
         {
-            Test();
+            //Test();
+
+            TestHashing();
         }
 
         private static void Test()
         {
-            var keyPair = CryptoUtilities.GenerateRandomKeys();
+            var keypair = CryptoUtilities.GenerateRandomKeys();
+            var privateKey = (ECPrivateKeyParameters)keypair.Private;
 
-            BigInteger privateKey = ((ECPrivateKeyParameters)keyPair.Private).D;
-            Console.WriteLine("Private key (hex): " + privateKey.ToString(16));
-            Console.WriteLine("Private key: " + privateKey.ToString(10));
+            var privateKeyHex = CryptoUtilities.PrivateKeyToHexString(privateKey);
 
-            ECPublicKeyParameters pubKey = (ECPublicKeyParameters)keyPair.Public;
-            Console.WriteLine("Public key: ({0}, {1})",
-                pubKey.Q.XCoord.ToBigInteger().ToString(10),
-                pubKey.Q.YCoord.ToBigInteger().ToString(10));
+            var restoredPrivateKey = CryptoUtilities.PrivateKeyFromPrivateKeyHex(privateKeyHex);
 
-            string pubKeyCompressed = CryptoUtilities.EncodeECPointHexCompressed(pubKey.Q);
-            Console.WriteLine("Public key (compressed): " + pubKeyCompressed);
+            var restoredPublicKey = CryptoUtilities.PublicKeyFromPrivateKey(restoredPrivateKey);
 
+            var publicKeyBase58 = CryptoUtilities.PublicKeyToBase58(restoredPublicKey);
 
-            Console.WriteLine($"Public key base58 '{CryptoUtilities.GetPublicKeyFromPrivateKeyExTEST(pubKey)}'");
+            var restoredPublicKeyFromBase58 = CryptoUtilities.PublicKeyFromBase58(publicKeyBase58);
+
+            Console.WriteLine(restoredPublicKeyFromBase58.Equals(restoredPublicKey));
 
 
-            //var randomKey = CryptoUtilities.GenerateRandomKeys();
-            //Console.WriteLine(randomKey.Private.ToString());
+            string message = "super secret message";
+            var signature = CryptoUtilities.SignData(message, restoredPrivateKey);
 
-            //var privateKey = (ECPrivateKeyParameters)randomKey.Private;
-            //var publicKey = (ECPublicKeyParameters)randomKey.Public;
-            //string privateKeyHexString = privateKey.D.ToString(16);
+            bool isValidSignature = CryptoUtilities.VerifySignature(restoredPublicKey, signature, message);
+            Console.WriteLine(isValidSignature);
 
-            //Console.WriteLine("Random key pair generated.");
-            //Console.WriteLine($"Private key '{privateKey.D.ToString(16)}'");
-            //Console.WriteLine($"Public key '{publicKey.Q}'");
+        }
 
-            //Console.WriteLine($"Public key base58'{CryptoUtilities.GetPublicKeyFromPrivateKeyExTEST(publicKey)}'");
+        private static void TestHashing()
+        {
+            string msg = "some message";
+            var hash = CryptoUtilities.CalculateSHA256(msg);
 
-            //Console.WriteLine(  CryptoUtilities.EncodeECPointHexCompressed(publicKey.Q));
 
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+            byte[] hashBytes = CryptoUtilities.CalculateSHA256(data);
+
+            var hash1 =  Convert.ToBase64String(hashBytes);
+
+            var hash2 = string.Concat(hashBytes.Select(b => b.ToString("x2")));
+
+            Console.WriteLine(hash1.Equals(hash2));
         }
     }
 }
