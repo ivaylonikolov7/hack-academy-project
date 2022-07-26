@@ -68,7 +68,7 @@ namespace HackChain.Utilities
         {
             ReadOnlySpan<char> span = new ReadOnlySpan<char>(publicKeyBase58.ToCharArray());
             var publicKeyBytes = Base58.Bitcoin.Decode(span).ToArray();
-            ECPoint q = null;// new ECPoint();
+            ECPoint q = _domainParametersSecp256k1.Curve.DecodePoint(publicKeyBytes);
 
             ECPublicKeyParameters publicKey = new ECPublicKeyParameters(q, _domainParametersSecp256k1);
 
