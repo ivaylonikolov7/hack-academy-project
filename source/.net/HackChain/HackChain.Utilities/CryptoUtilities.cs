@@ -55,8 +55,6 @@ namespace HackChain.Utilities
 
         public static string PublicKeyToBase58(ECPublicKeyParameters publicKey)
         {
-            // 65 bytes... is this correct?
-            // https://www.tabnine.com/code/java/methods/org.bouncycastle.math.ec.ECPoint/getEncoded - "remove prefix"?
             byte[] publicKeyBytes = publicKey.Q.GetEncoded();
 
             string result = Base58.Bitcoin.Encode(publicKeyBytes);
@@ -75,12 +73,37 @@ namespace HackChain.Utilities
             return publicKey;
         }
 
-        public static string CalculateSHA256(string text)
+        public static string PublicKeyToHex(ECPublicKeyParameters publicKey)
+        {
+            byte[] publicKeyBytes = publicKey.Q.GetEncoded();
+
+            string result = string.Concat(publicKeyBytes.Select(b => b.ToString("x2")));
+
+            return result;
+        }
+
+        public static ECPublicKeyParameters PublicKeyFromHex(string publicKeyHex)
+        {
+            byte[] publicKeyBytes = new byte[publicKeyHex.Length / 2];
+            for (int i = 0, h = 0; h < publicKeyHex.Length; i++, h += 2)
+            {
+                publicKeyBytes[i] = (byte)Int32.Parse(publicKeyHex.Substring(h, 2), System.Globalization.NumberStyles.HexNumber);
+            }
+
+            ECPoint q = _domainParametersSecp256k1.Curve.DecodePoint(publicKeyBytes);
+
+            ECPublicKeyParameters publicKey = new ECPublicKeyParameters(q, _domainParametersSecp256k1);
+
+            return publicKey;
+        }
+
+        public static string CalculateSHA256Hex(string text)
         {
             byte[] data = Encoding.UTF8.GetBytes(text);
             byte[] hash = CalculateSHA256(data);
+            string result = string.Concat(hash.Select(b => b.ToString("x2")));
 
-            return Convert.ToBase64String(hash);
+            return result;
         }
 
         public static byte[] CalculateSHA256(byte[] data)

@@ -26,15 +26,10 @@ namespace HackChain.Core.Extensions
         }
         public static string CalculateHash(this Transaction transaction)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            };
-
             var forHashing = transaction.SerializeForHashing();
-            var hash = CryptoUtilities.CalculateSHA256(forHashing);
+            var hashHex = CryptoUtilities.CalculateSHA256Hex(forHashing);
 
-            return hash;
+            return hashHex;
         }
         public static string Sign(this Transaction transaction, ECPrivateKeyParameters privateKey)
         {
@@ -49,14 +44,23 @@ namespace HackChain.Core.Extensions
             return signature;
         }
 
-        public static bool Verify(this Transaction transaction)
+        public static bool VerifySignature(this Transaction transaction)
         {
-            var publicKey = CryptoUtilities.PublicKeyFromBase58(transaction.Sender);
+            var publicKey = CryptoUtilities.PublicKeyFromHex(transaction.Sender);
 
             var hash = transaction.CalculateHash();
             var isValid = CryptoUtilities.VerifySignature(publicKey, transaction.Signature, hash);
 
             return isValid;
+        }
+
+        public static void Validate(this Transaction transaction)
+        {
+            // sender / recipient can be parsed to public keys
+            // value > 0 - what about overflow? What are BigInteger's limitations? memory?
+            // fee > 0 - what about overflow?
+            // check hash is correct
+            // check signiture is valid
         }
     }
 }

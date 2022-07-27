@@ -14,9 +14,11 @@ namespace HackChain.ConsoleTests
     {
         public static void Main(string[] args)
         {
-            TestKeys();
+            //TestKeys();
 
-            TestTransaction();
+            //TestTransaction();
+
+            TestBlock();
         }
 
         private static void TestKeys()
@@ -30,18 +32,18 @@ namespace HackChain.ConsoleTests
 
             var restoredPublicKey = CryptoUtilities.PublicKeyFromPrivateKey(restoredPrivateKey);
 
-            var publicKeyBase58 = CryptoUtilities.PublicKeyToBase58(restoredPublicKey);
+            var publicKeyHex = CryptoUtilities.PublicKeyToHex(restoredPublicKey);
 
-            //var restoredPublicKeyFromBase58 = CryptoUtilities.PublicKeyFromBase58(publicKeyBase58);
+            var restoredPublicKeyFromHex = CryptoUtilities.PublicKeyFromHex(publicKeyHex);
 
-            //Console.WriteLine(restoredPublicKeyFromBase58.Equals(restoredPublicKey));
+            Console.WriteLine(restoredPublicKeyFromHex.Equals(restoredPublicKey));
 
 
             Console.WriteLine(
 $@"Private key (decimal): '{privateKey.D.ToString(10)}'
 Private key (hex): '{privateKeyHex}'
 Public key (x,y): '{restoredPublicKey.Q}'
-Public key (base58): '{publicKeyBase58}'
+Public key (hex): '{publicKeyHex}'
 ");
 
 
@@ -54,13 +56,13 @@ Public key (base58): '{publicKeyBase58}'
 
         private static void TestTransaction()
         {
-            var senderPrivateKey = CryptoUtilities.PrivateKeyFromPrivateKeyHex("720ca602f9a84617dd99941c8ebdbce52b0f40313982be2eadc4d9a50cc1cc2e");
+            var senderPrivateKey = CryptoUtilities.PrivateKeyFromPrivateKeyHex("83f919649688da47e81ea3802d49b902d0367b027ca708dbf7a078b844f196b5");
             var publicKey = CryptoUtilities.PublicKeyFromPrivateKey(senderPrivateKey);
 
 
             var transaction = new Transaction(
-                sender: "RFsDMTqF4nuaYqbBpPoUGZuGHdbrHTVRxJFJBnj2d36EScekVu39owFUE93zoSm5Y35rTdMDx4ysXTXHaURpBS5u",
-                recipient: "RSBbFTCFMDrHgFLkBAthrrp3YwFua2xoALNykhF7LRpRkt2sL8FwFbctwA9X3D5fnunMHZfuLHoc2GVWZZb5mE6B",
+                sender: "04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
+                recipient: "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
                 nonce: 1,
                 value: 1000,
                 fee: 5);
@@ -94,10 +96,54 @@ Transaction full:
 '{fullTransaction}'
 
 Transaction isValid:
-'{transaction.Verify()}'
+'{transaction.VerifySignature()}'
 ");
 
 
+        }
+
+        private static void TestBlock()
+        {
+            Block block = new Block(
+                index: 1,
+                timestamp: DateTime.UtcNow.ToUnixTime(),
+                previousBlockHas: "none",
+                difficulty: 5
+                );
+
+            block.AddTransactions(new Transaction[]
+            {
+                new Transaction(
+                sender: "04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
+                recipient: "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
+                nonce: 1,
+                value: 1000,
+                fee: 5)
+            });
+
+            var rawBlock = block.Serialize();
+            var blockForHashing = block.SerializeForHashing();
+            var hash = block.Mine();
+
+            block.CurrentBlockHash = hash;
+
+            var fullBlock = block.Serialize();
+
+
+            Console.WriteLine(
+$@"
+Block raw:
+'{rawBlock}'
+
+Block for hashing:
+'{blockForHashing}'
+
+Block hash:
+'{hash}'
+
+Block full:
+'{fullBlock}'
+");
         }
     }
 }
