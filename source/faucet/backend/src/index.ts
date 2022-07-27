@@ -40,3 +40,5 @@ app.post('/send', async (req: Request, res: Response, next: NextFunction) => {
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
 });
+
+export default app;
