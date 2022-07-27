@@ -15,7 +15,7 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 app.post('/send', async (req: Request, res: Response, next: NextFunction) => {
-  var date = new Date(); 
+  const date = new Date(); 
   date.setDate(date.getDate() - 1);
   let user = await Address.findOne({ address: req.params.address });
   if(user && new Date(user.time) < date) {
