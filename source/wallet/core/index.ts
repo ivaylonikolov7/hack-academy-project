@@ -1,9 +1,8 @@
 import { program } from 'commander';
 
 import pkg from '../package.json';
-// import Account from './account';
 
-// const account = new Account();
+import Wallet from './wallet';
 
 program.version(pkg.version, '-v', '--version');
 
@@ -17,10 +16,12 @@ program
 program
     .command('import [alias]')
     .description('Import existing wallet')
-    .option('-m <mnemonic>', '--mnemonic <mnemonic>', 'Mnemonic')
-    .option('-p <privateKey>', '--privateKey <privateKey>', 'Private key')
+    .option('--mnemonic <mnemonic>', 'Mnemonic')
+    .option('--privateKey <privateKey>', 'Private key')
     .action((alias, options) => {
         console.log('import account with alias', alias, ' and options', options);
+
+        const wallet = new Wallet({ alias, privateKey: options.privateKey });
     });
 
 program

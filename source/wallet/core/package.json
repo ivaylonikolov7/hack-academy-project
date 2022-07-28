@@ -1,6 +1,6 @@
 {
-  "name": "@hackchain/wallet",
-  "version": "0.0.1",
+  "name": "@hackchain/wallet-core",
+  "version": "0.1.0",
   "description": "Simple CLI wallet for HackChain",
   "main": "index.js",
   "scripts": {
