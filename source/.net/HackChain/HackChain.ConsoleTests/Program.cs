@@ -1,12 +1,7 @@
 ﻿using HackChain.Core.Extensions;
 using HackChain.Core.Model;
-using HackChain.Core.Services;
 using HackChain.Utilities;
-using Newtonsoft.Json;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Math.EC;
-using System.Text;
 
 namespace HackChain.ConsoleTests
 {
@@ -14,9 +9,9 @@ namespace HackChain.ConsoleTests
     {
         public static void Main(string[] args)
         {
-            //TestKeys();
+            TestKeys();
 
-            //TestTransaction();
+            TestTransaction();
 
             TestBlock();
         }
