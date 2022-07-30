@@ -17,6 +17,8 @@ namespace HackChain.Core.Data
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Block> Blocks { get; set; }
 
+        public DbSet<Account> Accounts { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Transaction>()
@@ -26,9 +28,19 @@ namespace HackChain.Core.Data
                 .Property(t => t.Value)
                 .HasColumnType<decimal>("decimal(18,0)");
 
+
             builder.Entity<Transaction>()
                 .Property(t => t.Fee)
                 .HasColumnType<decimal>("decimal(18,0)");
+
+
+            builder.Entity<Account>()
+                .HasKey(a => a.Address);
+
+            builder.Entity<Account>()
+                .Property(a => a.Balance)
+                .HasColumnType<decimal>("decimal(18,0)");
+
 
             builder.Entity<Block>()
                 .HasKey(b => b.Index);

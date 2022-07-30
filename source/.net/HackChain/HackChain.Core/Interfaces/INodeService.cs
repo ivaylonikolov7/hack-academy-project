@@ -1,14 +1,16 @@
 ﻿using HackChain.Core.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HackChain.Core.Interfaces
 {
     public interface INodeService
     {
         Task AddTransaction(Transaction transaction);
+        Task<Transaction> GetTransactionByHash(string hash);
+        Task<IEnumerable<Transaction>> GetPendingTransactions();
+
+        Task<Block> GetBlockByIndex(long index);
+        Task MineBlock();
+
+        Task<Account> GetAccountByAddress(string address);
     }
 }

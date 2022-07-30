@@ -2,7 +2,6 @@
 using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
 using HackChain.Node.Web.DTO;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HackChain.Node.Web.Controllers
@@ -21,6 +20,7 @@ namespace HackChain.Node.Web.Controllers
             _nodeService = nodeService;
             _mapper = mapper;
         }
+
         [Route("add")]
         [HttpPost]
         public async Task<ActionResult<TransactionDTO>> AddTransaction([FromBody] TransactionDTO transaction)
@@ -29,6 +29,27 @@ namespace HackChain.Node.Web.Controllers
             await _nodeService.AddTransaction(internalTransaction);
 
             return transaction;
+        }
+
+        [Route("{hash}")]
+        [HttpGet]
+        public async Task<ActionResult<TransactionDTO>> GetByHash(string hash)
+        {
+            var transaction = await _nodeService.GetTransactionByHash(hash);
+            var result = _mapper.Map<TransactionDTO>(transaction);
+
+
+            return result;
+        }
+
+        [Route("pending")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TransactionDTO>>> GetPending()
+        {
+            var transactions = await _nodeService.GetPendingTransactions();
+            List<TransactionDTO> result = _mapper.Map<List<TransactionDTO>>(transactions);
+
+            return result;
         }
     }
 }
