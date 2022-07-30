@@ -59,9 +59,8 @@ namespace HackChain.Core.Extensions
                 tr.Validate();
                 // check balances
                 // check nonce
+                block.Data.Add(tr);
             }
-
-            block.Data.AddRange(transactions);
         }
 
         public static void Validate(this Block block)

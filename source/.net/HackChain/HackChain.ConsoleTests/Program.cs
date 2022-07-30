@@ -55,12 +55,12 @@ Public key (hex): '{publicKeyHex}'
             var publicKey = CryptoUtilities.PublicKeyFromPrivateKey(senderPrivateKey);
 
 
-            var transaction = new Transaction(
-                sender: "04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
-                recipient: "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
-                nonce: 1,
-                value: 1000,
-                fee: 5);
+            var transaction = new Transaction() { 
+                Sender = "04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
+                Recipient = "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
+                Nonce = 1,
+                Value = 1000,
+                Fee = 5};
 
             var rawTransaction = transaction.Serialize();
             var forHashing = transaction.SerializeForHashing();
@@ -99,21 +99,21 @@ Transaction isValid:
 
         private static void TestBlock()
         {
-            Block block = new Block(
-                index: 1,
-                timestamp: DateTime.UtcNow.ToUnixTime(),
-                previousBlockHas: "none",
-                difficulty: 5
-                );
+            Block block = new Block() {
+                Index = 1,
+                Timestamp = DateTime.UtcNow.ToUnixTime(),
+                PreviousBlockHash = "none",
+                Difficulty = 5
+                };
 
             block.AddTransactions(new Transaction[]
             {
-                new Transaction(
-                sender: "04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
-                recipient: "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
-                nonce: 1,
-                value: 1000,
-                fee: 5)
+                new Transaction() {
+                Sender = "04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
+                Recipient = "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
+                Nonce = 1,
+                Value = 1000,
+                Fee = 5 }
             });
 
             var rawBlock = block.Serialize();

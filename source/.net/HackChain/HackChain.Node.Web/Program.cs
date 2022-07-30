@@ -1,15 +1,20 @@
+using HackChain.Core.Data;
 using HackChain.Core.Interfaces;
 using HackChain.Core.Services;
+using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 
 namespace HackChain.Node.Web
 {
     public class Program
     {
-        public static void ConfigureServices(IServiceCollection services)
+        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             services.AddRazorPages();
             services.AddAutoMapper(typeof(Program));
+
+            services.AddDbContext<HackChainDbContext>(opts =>
+                opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
 
             services.AddScoped<INodeService, NodeService>();
         }
@@ -18,7 +23,7 @@ namespace HackChain.Node.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            ConfigureServices(builder.Services);
+            ConfigureServices(builder.Services, builder.Configuration);
 
             var app = builder.Build();
            
