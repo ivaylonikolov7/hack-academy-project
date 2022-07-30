@@ -22,6 +22,22 @@ namespace HackChain.Core.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("HackChain.Core.Model.Account", b =>
+                {
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,0)");
+
+                    b.Property<long>("Nonce")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Address");
+
+                    b.ToTable("Accounts");
+                });
+
             modelBuilder.Entity("HackChain.Core.Model.Block", b =>
                 {
                     b.Property<long>("Index")

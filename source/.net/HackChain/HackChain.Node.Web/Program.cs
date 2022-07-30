@@ -10,8 +10,18 @@ namespace HackChain.Node.Web
     {
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.AddControllers();
             services.AddRazorPages();
             services.AddAutoMapper(typeof(Program));
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "HackChain Node",
+                    Description = "Hack Academy Group project."
+                });
+            });
 
             services.AddDbContext<HackChainDbContext>(opts =>
                 opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
@@ -42,6 +52,12 @@ namespace HackChain.Node.Web
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             app.MapRazorPages();
             app.UseEndpoints(options =>
