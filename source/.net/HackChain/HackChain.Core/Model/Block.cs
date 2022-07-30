@@ -4,19 +4,19 @@ namespace HackChain.Core.Model
 {
     public class Block
     {
-        public BigInteger Index { get; set; }
-        public BigInteger Timestamp { get; set; }
+        public decimal Index { get; set; }
+        public decimal Timestamp { get; set; }
         public List<Transaction> Data { get; set; }
         public string PreviousBlockHash { get; set; }
-        public BigInteger Nonce { get; set; }
-        public BigInteger Difficulty { get; set; }
+        public decimal Nonce { get; set; }
+        public decimal Difficulty { get; set; }
         public string CurrentBlockHash { get; set; }
 
         public Block(
-            BigInteger index,
-            BigInteger timestamp,
+            decimal index,
+            decimal timestamp,
             string previousBlockHas,
-            BigInteger difficulty
+            decimal difficulty
             )
         {
             Index = index;

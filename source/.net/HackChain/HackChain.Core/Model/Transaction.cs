@@ -11,18 +11,18 @@ namespace HackChain.Core.Model
     {
         public string Sender { get; set; }
         public string Recipient { get; set; }
-        public BigInteger Nonce { get; set; }
-        public string Data { get; set; }
-        public BigInteger Value { get; set; }
-        public BigInteger Fee { get; set; }
+        public decimal Nonce { get; set; }
+        public string? Data { get; set; }
+        public decimal Value { get; set; }
+        public decimal Fee { get; set; }
         public string Hash { get; set; }
         public string Signature { get; set; }
         public Transaction(
             string sender,
             string recipient,
-            BigInteger nonce,
-            BigInteger value,
-            BigInteger fee
+            decimal nonce,
+            decimal value,
+            decimal fee
             )
         {
             Sender = sender;
