@@ -1,6 +1,6 @@
-﻿namespace HackChain.Core.Model
+﻿namespace HackChain.Node.Web.DTO
 {
-    public class Account
+    public class AccountDTO
     {
         public string Address { get; set; }
         public decimal Balance { get; set; }
