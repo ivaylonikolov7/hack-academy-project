@@ -1,4 +1,5 @@
-﻿using HackChain.Core.Interfaces;
+﻿using AutoMapper;
+using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
 using HackChain.Node.Web.DTO;
 using Microsoft.AspNetCore.Http;
@@ -11,18 +12,21 @@ namespace HackChain.Node.Web.Controllers
     public class TransactionsController : ControllerBase
     {
         private INodeService _nodeService;
+        private IMapper _mapper;
 
         public TransactionsController(
-            INodeService nodeService)
+            INodeService nodeService,
+            IMapper mapper)
         {
             _nodeService = nodeService;
+            _mapper = mapper;
         }
         [Route("add")]
         [HttpPost]
-        public async Task<ActionResult<Transaction>> AddTransaction([FromBody] Transaction transaction)
+        public async Task<ActionResult<TransactionDTO>> AddTransaction([FromBody] TransactionDTO transaction)
         {
-
-            await _nodeService.AddTransaction(transaction);
+            var internalTransaction = _mapper.Map<Transaction>(transaction);
+            await _nodeService.AddTransaction(internalTransaction);
 
             return transaction;
         }

@@ -8,15 +8,15 @@ namespace HackChain.Node.Web
     {
         public static void ConfigureServices(IServiceCollection services)
         {
+            services.AddRazorPages();
+            services.AddAutoMapper(typeof(Program));
+
             services.AddScoped<INodeService, NodeService>();
         }
 
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-            builder.Services.AddRazorPages();
 
             ConfigureServices(builder.Services);
 
