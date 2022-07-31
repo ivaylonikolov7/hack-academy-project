@@ -15,21 +15,6 @@ namespace HackChain.Core.Services
         {
             _db = db;
         }
-        public async Task AddTransaction(Transaction transaction)
-        {
-            transaction.Validate();
-            var existingTransaction = await _db.Transactions.FirstOrDefaultAsync(tr => tr.Hash == transaction.Hash);
-            if(existingTransaction != null)
-            {
-                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] is duplicated.",
-                    HackChainErrorCode.Transaction_Duplicate);
-            }
-
-
-            _db.Transactions.Add(transaction);
-            
-            await _db.SaveChangesAsync();
-        }
 
         public async Task<Account> GetAccountByAddress(string address)
         {
@@ -43,13 +28,6 @@ namespace HackChain.Core.Services
             var block = await _db.Blocks.FirstOrDefaultAsync(a => a.Index == index);
 
             return block;
-        }
-
-        public async Task<Transaction> GetTransactionByHash(string hash)
-        {
-            var transaction = await _db.Transactions.FirstOrDefaultAsync(a => a.Hash == hash);
-
-            return transaction;
         }
 
         public Task MineBlock()

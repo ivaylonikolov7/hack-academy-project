@@ -30,6 +30,7 @@ namespace HackChain.Node.Web
                 opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
 
             services.AddScoped<INodeService, NodeService>();
+            services.AddScoped<ITransactionService, TransactionService>();
         }
 
         public static void Main(string[] args)

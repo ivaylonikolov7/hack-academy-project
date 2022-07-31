@@ -10,14 +10,14 @@ namespace HackChain.Node.Web.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
-        private INodeService _nodeService;
+        private ITransactionService _transactionService;
         private IMapper _mapper;
 
         public TransactionsController(
-            INodeService nodeService,
+            ITransactionService transactionService,
             IMapper mapper)
         {
-            _nodeService = nodeService;
+            _transactionService = transactionService;
             _mapper = mapper;
         }
 
@@ -26,7 +26,7 @@ namespace HackChain.Node.Web.Controllers
         public async Task<ActionResult<TransactionDTO>> AddTransaction([FromBody] TransactionDTO transaction)
         {
             var internalTransaction = _mapper.Map<Transaction>(transaction);
-            await _nodeService.AddTransaction(internalTransaction);
+            await _transactionService.AddTransaction(internalTransaction);
 
             return transaction;
         }
@@ -35,7 +35,7 @@ namespace HackChain.Node.Web.Controllers
         [HttpGet]
         public async Task<ActionResult<TransactionDTO>> GetByHash(string hash)
         {
-            var transaction = await _nodeService.GetTransactionByHash(hash);
+            var transaction = await _transactionService.GetTransactionByHash(hash);
             var result = _mapper.Map<TransactionDTO>(transaction);
 
 
@@ -46,7 +46,7 @@ namespace HackChain.Node.Web.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TransactionDTO>>> GetPending()
         {
-            var transactions = await _nodeService.GetPendingTransactions();
+            var transactions = await _transactionService.GetPendingTransactions();
             List<TransactionDTO> result = _mapper.Map<List<TransactionDTO>>(transactions);
 
             return result;

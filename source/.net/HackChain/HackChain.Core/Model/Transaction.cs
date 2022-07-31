@@ -18,6 +18,8 @@ namespace HackChain.Core.Model
         public string Hash { get; set; }
         public string Signature { get; set; }
 
+        public bool IsValidForNextBlock { get; set; }
+
         public long? BlockIndex { get; set; }
         public virtual Block Block { get; set; }
     }
