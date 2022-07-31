@@ -12,6 +12,8 @@ namespace HackChain.Node.Web.Infrastructure
             CreateMap<TransactionDTO, Transaction>();
 
             CreateMap<Account, AccountDTO>();
+
+            CreateMap<Block, BlockDTO>();
         }
     }
 }

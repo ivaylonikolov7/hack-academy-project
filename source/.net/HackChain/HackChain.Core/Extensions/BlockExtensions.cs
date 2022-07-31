@@ -13,8 +13,15 @@ namespace HackChain.Core.Extensions
     {
         public static string SerializeForHashing(this Block b)
         {
-            var dataString = $"{string.Join(',', b.Data.Select(t=>t.SerializeForHashing()))}]";
+            var dataString = $"{string.Join(',', b.Data.Select(t => t.SerializeForHashing()))}]";
             var result = $"{{\"Index\": {b.Index},\"Timestamp\": {b.Timestamp},\"Data\": [{dataString}],\"PreviousBlockHash\": \"{ b.PreviousBlockHash}\",\"Nonce\": {b.Nonce},\"Difficulty\": {b.Difficulty}}}";
+
+            return result;
+        }
+        public static string SerializeForMining(this Block b, string noncePlaceholder)
+        {
+            var dataString = $"{string.Join(',', b.Data.Select(t => t.SerializeForHashing()))}]";
+            var result = $"{{\"Index\": {b.Index},\"Timestamp\": {b.Timestamp},\"Data\": [{dataString}],\"PreviousBlockHash\": \"{ b.PreviousBlockHash}\",\"Nonce\": {noncePlaceholder},\"Difficulty\": {b.Difficulty}}}";
 
             return result;
         }
@@ -56,9 +63,6 @@ namespace HackChain.Core.Extensions
         {
             foreach (var tr in transactions)
             {
-                tr.Validate();
-                // check balances
-                // check nonce
                 block.Data.Add(tr);
             }
         }

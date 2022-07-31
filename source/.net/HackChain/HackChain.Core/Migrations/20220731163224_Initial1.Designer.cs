@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HackChain.Core.Migrations
 {
     [DbContext(typeof(HackChainDbContext))]
-    [Migration("20220730223222_Initial")]
-    partial class Initial
+    [Migration("20220731163224_Initial1")]
+    partial class Initial1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -42,17 +42,18 @@ namespace HackChain.Core.Migrations
 
             modelBuilder.Entity("HackChain.Core.Model.Block", b =>
                 {
-                    b.Property<long>("Index")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Index"), 1L, 1);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CurrentBlockHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("Difficulty")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("Index")
                         .HasColumnType("bigint");
 
                     b.Property<long>("Nonce")
@@ -65,7 +66,10 @@ namespace HackChain.Core.Migrations
                     b.Property<long>("Timestamp")
                         .HasColumnType("bigint");
 
-                    b.HasKey("Index");
+                    b.HasKey("Id");
+
+                    b.HasIndex("Index")
+                        .IsUnique();
 
                     b.ToTable("Blocks");
                 });
@@ -75,6 +79,9 @@ namespace HackChain.Core.Migrations
                     b.Property<string>("Hash")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<Guid>("BlockId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<long?>("BlockIndex")
                         .HasColumnType("bigint");
 
@@ -83,6 +90,9 @@ namespace HackChain.Core.Migrations
 
                     b.Property<decimal>("Fee")
                         .HasColumnType("decimal(18,0)");
+
+                    b.Property<bool>("IsValidForNextBlock")
+                        .HasColumnType("bit");
 
                     b.Property<long>("Nonce")
                         .HasColumnType("bigint");
@@ -104,7 +114,7 @@ namespace HackChain.Core.Migrations
 
                     b.HasKey("Hash");
 
-                    b.HasIndex("BlockIndex");
+                    b.HasIndex("BlockId");
 
                     b.ToTable("Transactions");
                 });
@@ -113,7 +123,9 @@ namespace HackChain.Core.Migrations
                 {
                     b.HasOne("HackChain.Core.Model.Block", "Block")
                         .WithMany("Data")
-                        .HasForeignKey("BlockIndex");
+                        .HasForeignKey("BlockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Block");
                 });

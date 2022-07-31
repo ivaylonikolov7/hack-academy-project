@@ -43,8 +43,10 @@ namespace HackChain.Core.Data
 
 
             builder.Entity<Block>()
-                .HasKey(b => b.Index);
-
+                .HasKey(b => b.Id);
+            builder.Entity<Block>()
+                .HasIndex(b => b.Index)
+                .IsUnique();
 
             base.OnModelCreating(builder);
         }

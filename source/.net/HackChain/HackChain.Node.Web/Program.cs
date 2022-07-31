@@ -1,5 +1,6 @@
 using HackChain.Core.Data;
 using HackChain.Core.Interfaces;
+using HackChain.Core.Model;
 using HackChain.Core.Services;
 using HackChain.Node.Web.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,11 @@ namespace HackChain.Node.Web
 
             services.AddScoped<INodeService, NodeService>();
             services.AddScoped<ITransactionService, TransactionService>();
+
+            var settings = new HackChainSettings();
+            configuration.Bind("HackChainSettings", settings);
+            services.AddSingleton(settings);
+
         }
 
         public static void Main(string[] args)

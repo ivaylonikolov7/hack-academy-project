@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace HackChain.Core.Migrations
 {
-    public partial class Initial : Migration
+    public partial class Initial1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -25,8 +26,8 @@ namespace HackChain.Core.Migrations
                 name: "Blocks",
                 columns: table => new
                 {
-                    Index = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Index = table.Column<long>(type: "bigint", nullable: false),
                     Timestamp = table.Column<long>(type: "bigint", nullable: false),
                     PreviousBlockHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Nonce = table.Column<long>(type: "bigint", nullable: false),
@@ -35,7 +36,7 @@ namespace HackChain.Core.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Blocks", x => x.Index);
+                    table.PrimaryKey("PK_Blocks", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -50,22 +51,31 @@ namespace HackChain.Core.Migrations
                     Value = table.Column<decimal>(type: "decimal(18,0)", nullable: false),
                     Fee = table.Column<decimal>(type: "decimal(18,0)", nullable: false),
                     Signature = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BlockIndex = table.Column<long>(type: "bigint", nullable: true)
+                    IsValidForNextBlock = table.Column<bool>(type: "bit", nullable: false),
+                    BlockIndex = table.Column<long>(type: "bigint", nullable: true),
+                    BlockId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transactions", x => x.Hash);
                     table.ForeignKey(
-                        name: "FK_Transactions_Blocks_BlockIndex",
-                        column: x => x.BlockIndex,
+                        name: "FK_Transactions_Blocks_BlockId",
+                        column: x => x.BlockId,
                         principalTable: "Blocks",
-                        principalColumn: "Index");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transactions_BlockIndex",
+                name: "IX_Blocks_Index",
+                table: "Blocks",
+                column: "Index",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_BlockId",
                 table: "Transactions",
-                column: "BlockIndex");
+                column: "BlockId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
