@@ -13,13 +13,16 @@ namespace HackChain.Core.Services
     {
         private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
         private HackChainDbContext _db;
+        private IAccountService _accountService;
         private HackChainSettings _settings;
 
         public NodeService(
             HackChainDbContext db,
+            IAccountService accountService,
             HackChainSettings settings)
         {
             _db = db;
+            _accountService = accountService;
             _settings = settings;
         }
 
@@ -42,10 +45,11 @@ namespace HackChain.Core.Services
         public async Task MineBlock()
         {
             var transactions = await _db.Transactions
-                .Where(tr => tr.IsValidForNextBlock)
+                .Where(tr => tr.BlockIndex == null && tr.IsValidForNextBlock)
                 .OrderByDescending(tr => tr.Fee)
                 .Take(10)
                 .ToListAsync();
+            AddCoinbaseTransaction(transactions);
 
             var lastBlock = await GetLastBlock();
 
@@ -57,22 +61,23 @@ namespace HackChain.Core.Services
                 Timestamp = DateTime.UtcNow.ToUnixTime()
             };
 
-            AddCoinbaseTransaction(transactions);
             currentBlock.AddTransactions(transactions);
             CalculateBlockHash(currentBlock);
 
             _db.Blocks.Add(currentBlock);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
 
-            UpdateAccounts(currentBlock);
+            await UpdateAccounts(currentBlock);
+            await _db.SaveChangesAsync();
         }
 
-        private void UpdateAccounts(Block currentBlock)
+        private async Task UpdateAccounts(Block currentBlock)
         {
-            //foreach (var tr in currentBlock.Data)
-            //{
-            //    var sender = _db.Accounts.fir
-            //}
+            //TODO: optimaze db operations - read all account in one query
+            foreach (var tr in currentBlock.Data)
+            {
+                await _accountService.ApplyTransactionData(tr);
+            }
         }
 
         private async Task<Block> GetLastBlock()

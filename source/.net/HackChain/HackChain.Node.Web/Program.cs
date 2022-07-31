@@ -32,6 +32,7 @@ namespace HackChain.Node.Web
 
             services.AddScoped<INodeService, NodeService>();
             services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IAccountService, AccountService>();
 
             var settings = new HackChainSettings();
             configuration.Bind("HackChainSettings", settings);
