@@ -98,5 +98,10 @@ namespace HackChain.Core.Extensions
                     HackChainErrorCode.Transaction_Invalid_Signature);
             }
         }
+
+        public static bool IsCoinbase(this Transaction transaction)
+        {
+            return transaction.Signature == "Coinbase";
+        }
     }
 }

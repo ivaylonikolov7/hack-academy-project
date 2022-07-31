@@ -12,5 +12,7 @@
         Transaction_Invalid_Hash,
         Transaction_Invalid_Signature,
         Transaction_Duplicate,
+
+        Block_Invalid_Operation = 2000,
     }
 }

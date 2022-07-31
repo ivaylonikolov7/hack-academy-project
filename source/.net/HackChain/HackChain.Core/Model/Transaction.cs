@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HackChain.Core.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -22,5 +23,21 @@ namespace HackChain.Core.Model
 
         public long? BlockIndex { get; set; }
         public virtual Block Block { get; set; }
+
+        public static Transaction Coinbase(string recipient, decimal value)
+        {
+            var transaction = new Transaction
+            {
+                Sender = "",
+                Recipient = recipient,
+                Nonce = 1,
+                Value = value,
+                Signature = "Coinbase"
+            };
+
+            transaction.Hash = transaction.CalculateHash();
+
+            return transaction;
+        }
     }
 }

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HackChain.Core.Model
+﻿namespace HackChain.Core.Model
 {
     public class HackChainSettings
     {
         public int Difficulty { get; set; }
+        public decimal CoinbaseValue { get; set; }
+        public string MinerAddress { get; set; }
     }
 }

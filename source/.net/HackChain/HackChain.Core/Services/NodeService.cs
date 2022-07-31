@@ -57,11 +57,22 @@ namespace HackChain.Core.Services
                 Timestamp = DateTime.UtcNow.ToUnixTime()
             };
 
+            AddCoinbaseTransaction(transactions);
             currentBlock.AddTransactions(transactions);
             CalculateBlockHash(currentBlock);
 
             _db.Blocks.Add(currentBlock);
             _db.SaveChanges();
+
+            UpdateAccounts(currentBlock);
+        }
+
+        private void UpdateAccounts(Block currentBlock)
+        {
+            //foreach (var tr in currentBlock.Data)
+            //{
+            //    var sender = _db.Accounts.fir
+            //}
         }
 
         private async Task<Block> GetLastBlock()
@@ -93,28 +104,31 @@ namespace HackChain.Core.Services
                 Timestamp = DateTime.UtcNow.ToUnixTime()
             };
 
-            genesisBlock.AddTransactions(GetGenesisBlockTransactions());
+            var transactions = GetGenesisBlockTransactions();
+            AddCoinbaseTransaction(transactions);
+            genesisBlock.AddTransactions(transactions);
 
             CalculateBlockHash(genesisBlock);
 
             return genesisBlock;
         }
 
-        private static List<Transaction> GetGenesisBlockTransactions()
+        private void AddCoinbaseTransaction(List<Transaction> transactions)
         {
-            var transaction = new Transaction()
-            {
-                Sender = "",
-                Recipient = "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
-                Nonce = 1,
-                Value = 100000,
-                Signature = "none"
-            };
+            decimal totalFees = transactions.Sum(tr => tr.Fee);
 
-            transaction.Hash = transaction.CalculateHash();
+            var coinbaseTransaction = Transaction.Coinbase(_settings.MinerAddress, _settings.CoinbaseValue + totalFees);
+            transactions.Add(coinbaseTransaction);
+        }
+
+        private List<Transaction> GetGenesisBlockTransactions()
+        {
+            //TODO: read json file, generate Coinbase transactions in a loop
             return new List<Transaction>()
             {
-                transaction
+                Transaction.Coinbase(
+                    "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
+                    100000)
             };
         }
 

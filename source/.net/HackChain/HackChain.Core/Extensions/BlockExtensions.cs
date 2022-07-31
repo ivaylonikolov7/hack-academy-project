@@ -1,4 +1,5 @@
-﻿using HackChain.Core.Model;
+﻿using HackChain.Core.Infrastructure;
+using HackChain.Core.Model;
 using HackChain.Utilities;
 using Newtonsoft.Json;
 using System;
@@ -61,10 +62,18 @@ namespace HackChain.Core.Extensions
 
         public static void AddTransactions(this Block block, IEnumerable<Transaction> transactions)
         {
+            if(block.Data.Any())
+            {
+                throw new HackChainException($"Block data already contains transactions.",
+                    HackChainErrorCode.Block_Invalid_Operation);
+            }
+
             foreach (var tr in transactions)
             {
                 block.Data.Add(tr);
             }
+
+
         }
 
         public static void Validate(this Block block)
