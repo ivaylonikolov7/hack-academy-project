@@ -2,6 +2,8 @@
 using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
 using Microsoft.EntityFrameworkCore;
+using HackChain.Core.Extensions;
+using HackChain.Core.Infrastructure;
 
 namespace HackChain.Core.Services
 {
@@ -15,6 +17,15 @@ namespace HackChain.Core.Services
         }
         public async Task AddTransaction(Transaction transaction)
         {
+            transaction.Validate();
+            var existingTransaction = await _db.Transactions.FirstOrDefaultAsync(tr => tr.Hash == transaction.Hash);
+            if(existingTransaction != null)
+            {
+                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] is duplicated.",
+                    HackChainErrorCode.Transaction_Duplicate);
+            }
+
+
             _db.Transactions.Add(transaction);
             
             await _db.SaveChangesAsync();

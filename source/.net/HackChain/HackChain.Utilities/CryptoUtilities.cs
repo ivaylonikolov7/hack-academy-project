@@ -84,15 +84,24 @@ namespace HackChain.Utilities
 
         public static ECPublicKeyParameters PublicKeyFromHex(string publicKeyHex)
         {
-            byte[] publicKeyBytes = new byte[publicKeyHex.Length / 2];
-            for (int i = 0, h = 0; h < publicKeyHex.Length; i++, h += 2)
+            ECPublicKeyParameters publicKey = null;
+
+            try
             {
-                publicKeyBytes[i] = (byte)Int32.Parse(publicKeyHex.Substring(h, 2), System.Globalization.NumberStyles.HexNumber);
+                byte[] publicKeyBytes = new byte[publicKeyHex.Length / 2];
+                for (int i = 0, h = 0; h < publicKeyHex.Length; i++, h += 2)
+                {
+                    publicKeyBytes[i] = (byte)Int32.Parse(publicKeyHex.Substring(h, 2), System.Globalization.NumberStyles.HexNumber);
+                }
+
+                ECPoint q = _domainParametersSecp256k1.Curve.DecodePoint(publicKeyBytes);
+
+                publicKey = new ECPublicKeyParameters(q, _domainParametersSecp256k1);
             }
+            catch(Exception ex)
+            {
 
-            ECPoint q = _domainParametersSecp256k1.Curve.DecodePoint(publicKeyBytes);
-
-            ECPublicKeyParameters publicKey = new ECPublicKeyParameters(q, _domainParametersSecp256k1);
+            }
 
             return publicKey;
         }

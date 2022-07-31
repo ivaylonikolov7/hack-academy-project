@@ -29,7 +29,7 @@ namespace HackChain.Node.Web.Infrastructure
             {
                 errorMessage = context.Exception.ToString();
                 httpCode = HttpStatusCode.InternalServerError;
-                errorCode = HackChainErrorCode.BE_GenericError;
+                errorCode = HackChainErrorCode.GenericError;
             }
 
             var apiResponse = new ApiResponse<string> { Data = null };
@@ -44,8 +44,20 @@ namespace HackChain.Node.Web.Infrastructure
         {
             HttpStatusCode statusCode;
             switch (errorCode)
-            { 
-                //case HackChainErrorCode.BE_GenericError:
+            {
+                case HackChainErrorCode.GenericError:
+
+                case HackChainErrorCode.Transaction_Invalid_Sender:
+                case HackChainErrorCode.Transaction_Invalid_Recipient:
+                case HackChainErrorCode.Transaction_Invalid_Value:
+                case HackChainErrorCode.Transaction_Invalid_Fee:
+                case HackChainErrorCode.Transaction_Invalid_Hash:
+                case HackChainErrorCode.Transaction_Invalid_Signature:
+                case HackChainErrorCode.Transaction_Duplicate:
+                    statusCode = HttpStatusCode.BadRequest;
+                    break;
+
+
                 default:
                     statusCode = HttpStatusCode.InternalServerError;
                     break;

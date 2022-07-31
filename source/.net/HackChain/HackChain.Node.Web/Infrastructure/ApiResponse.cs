@@ -16,7 +16,7 @@ namespace HackChain.Node.Web.Infrastructure
 
         [JsonProperty("errors")]
         public List<ApiResponseError> Errors { get; set; } = new List<ApiResponseError>();
-        public void AddError(string error, HackChainErrorCode errorCode = HackChainErrorCode.BE_GenericError, string clientMessage = null)
+        public void AddError(string error, HackChainErrorCode errorCode = HackChainErrorCode.GenericError, string clientMessage = null)
         {
             Errors.Add(new ApiResponseError(error, errorCode, clientMessage));
         }
