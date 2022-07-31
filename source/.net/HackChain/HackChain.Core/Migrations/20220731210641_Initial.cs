@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HackChain.Core.Migrations
 {
-    public partial class Initial1 : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -52,8 +52,7 @@ namespace HackChain.Core.Migrations
                     Fee = table.Column<decimal>(type: "decimal(18,0)", nullable: false),
                     Signature = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsValidForNextBlock = table.Column<bool>(type: "bit", nullable: false),
-                    BlockIndex = table.Column<long>(type: "bigint", nullable: true),
-                    BlockId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    BlockId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -62,8 +61,7 @@ namespace HackChain.Core.Migrations
                         name: "FK_Transactions_Blocks_BlockId",
                         column: x => x.BlockId,
                         principalTable: "Blocks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(

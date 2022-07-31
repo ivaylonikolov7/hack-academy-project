@@ -21,14 +21,14 @@ namespace HackChain.Core.Model
 
         public bool IsValidForNextBlock { get; set; }
 
-        public long? BlockIndex { get; set; }
+        public Guid? BlockId { get; set; }
         public virtual Block Block { get; set; }
 
         public static Transaction Coinbase(string recipient, decimal value)
         {
             var transaction = new Transaction
             {
-                Sender = "",
+                Sender = DateTime.UtcNow.Ticks.ToString(),
                 Recipient = recipient,
                 Nonce = 1,
                 Value = value,

@@ -77,11 +77,8 @@ namespace HackChain.Core.Migrations
                     b.Property<string>("Hash")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid>("BlockId")
+                    b.Property<Guid?>("BlockId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<long?>("BlockIndex")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Data")
                         .HasColumnType("nvarchar(max)");
@@ -121,9 +118,7 @@ namespace HackChain.Core.Migrations
                 {
                     b.HasOne("HackChain.Core.Model.Block", "Block")
                         .WithMany("Data")
-                        .HasForeignKey("BlockId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BlockId");
 
                     b.Navigation("Block");
                 });

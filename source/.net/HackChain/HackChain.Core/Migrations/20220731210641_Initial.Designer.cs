@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HackChain.Core.Migrations
 {
     [DbContext(typeof(HackChainDbContext))]
-    [Migration("20220731163224_Initial1")]
-    partial class Initial1
+    [Migration("20220731210641_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -79,11 +79,8 @@ namespace HackChain.Core.Migrations
                     b.Property<string>("Hash")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid>("BlockId")
+                    b.Property<Guid?>("BlockId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<long?>("BlockIndex")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Data")
                         .HasColumnType("nvarchar(max)");
@@ -123,9 +120,7 @@ namespace HackChain.Core.Migrations
                 {
                     b.HasOne("HackChain.Core.Model.Block", "Block")
                         .WithMany("Data")
-                        .HasForeignKey("BlockId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BlockId");
 
                     b.Navigation("Block");
                 });

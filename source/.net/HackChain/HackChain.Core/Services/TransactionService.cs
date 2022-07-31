@@ -44,7 +44,7 @@ namespace HackChain.Core.Services
         {
             var transactions = await
                 _db.Transactions
-                    .Where(t => t.BlockIndex == null)
+                    .Where(t => t.BlockId == null)
                     .ToListAsync();
 
             return transactions;

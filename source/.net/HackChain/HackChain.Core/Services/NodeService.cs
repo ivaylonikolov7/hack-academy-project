@@ -45,7 +45,7 @@ namespace HackChain.Core.Services
         public async Task MineBlock()
         {
             var transactions = await _db.Transactions
-                .Where(tr => tr.BlockIndex == null && tr.IsValidForNextBlock)
+                .Where(tr => tr.BlockId == null && tr.IsValidForNextBlock)
                 .OrderByDescending(tr => tr.Fee)
                 .Take(10)
                 .ToListAsync();
@@ -91,6 +91,8 @@ namespace HackChain.Core.Services
             {
                 var genesisBlock = GenerateGenesisBlock();
                 _db.Blocks.Add(genesisBlock);
+                await _db.SaveChangesAsync();
+                await UpdateAccounts(genesisBlock);
                 await _db.SaveChangesAsync();
 
                 lastBlock = genesisBlock;
