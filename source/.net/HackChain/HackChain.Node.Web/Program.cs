@@ -1,6 +1,7 @@
 using HackChain.Core.Data;
 using HackChain.Core.Interfaces;
 using HackChain.Core.Services;
+using HackChain.Node.Web.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 
@@ -10,7 +11,9 @@ namespace HackChain.Node.Web
     {
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddControllers();
+            services.AddControllers(options =>
+                options.Filters.Add(typeof(HackChainExceptionFilterAttribute))
+            );
             services.AddRazorPages();
             services.AddAutoMapper(typeof(Program));
             services.AddSwaggerGen(c =>
