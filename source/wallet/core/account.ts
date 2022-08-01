@@ -7,42 +7,19 @@ const ec = new elliptic.ec('secp256k1');
 
 class Account {
   public key: any = {};
+  public publicKey: string;
+  public privateKey: string;
 
   constructor(privateKey: string) {
-
     if (privateKey) {
       this.key = ec.keyFromPrivate(privateKey);
     } else {
       this.key = ec.genKeyPair();
     }
 
-    // const key = ec.keyFromPrivate(privateKey);
-    // this.keypair = keypair;
-
-    // console.log('private key', privateKey);
-    // if (privateKey) {
-    //   this.restore(alias, privateKey);
-    // } else {
-    //   this.generate(alias);
-    // }
+    this.publicKey = this.address();
+    this.privateKey = this.key.getPrivate('hex');
   }
-
-  // restore(alias: string, privateKey: string) {
-  //   
-
-  //   const key = ec.keyFromPrivate(privateKey);
-
-  //   this.keypair = {
-  //     privateKey: key,
-  //     publicKey: key.getPublic().encode('hex', false),
-  //   };
-
-
-  // }
-
-  // generate(alias: string) {
-  //   console.log('generate keypair');
-  // }
  
   sign(message: string) {
     return this.key.sign(sha256(message)).toDER('hex');
@@ -50,10 +27,6 @@ class Account {
 
   address(): string {
     return this.key.getPublic().encode('hex');
-  }
-
-  signTransaction() {
-    
   }
 };
 

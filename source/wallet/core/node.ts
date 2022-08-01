@@ -1,3 +1,5 @@
+import Transaction from './transaction';
+
 class Node {
     public id: string;
     public url: string;
@@ -7,8 +9,16 @@ class Node {
         this.url = url;
     }
 
-    async sendTransaction(tx: Object) {
+    async broadcastTransaction(tx: any) {
+        const response = await fetch(`${this.url}/api/transactions/add`, {
+            method: 'POST',
+            mode: 'cors',
+            headers: new Headers({ 'content-type': 'application/json' }),
+            body: tx,
+        });
 
+
+        return response.json();
     }
 }
 

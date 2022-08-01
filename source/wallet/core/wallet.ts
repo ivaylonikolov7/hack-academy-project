@@ -1,5 +1,6 @@
 import Account from "./account";
 import Node from './node';
+import Transaction from './transaction';
 
 class Wallet {
     public accounts: Map<string, Account> = new Map();
@@ -15,9 +16,10 @@ class Wallet {
     addAccount(account: Account, { selected }: { selected?: Boolean }) {
         const address = account.address();
 
-        this.accounts[address] = account;
+        this.accounts.set(address, account);
     
         if (selected) {
+            console.log('address', address);
             this.selectedAccount = address;
         }
     }
@@ -34,16 +36,30 @@ class Wallet {
         this.selectedNode = nodeId;
     }
 
-    buildTx() {
-
-    }
-
-    sendTransaction(tx: string) {
-        console.log(this.nodes);
-        console.log(this.selectedNode);
+    async sendTransaction(rawTx: any) {
         const node = this.nodes.get(this.selectedNode);
+        const account = this.accounts.get(this.selectedAccount);
 
-        // console.log('send transaction', node);
+        console.log(this.accounts);
+
+        // TODO: get account nonce
+        // TODO: check if account has enough funds
+
+        console.log(this.selectedAccount);
+
+        const tx = new Transaction(this.selectedAccount,
+            rawTx.recipient,
+            rawTx.nonce,
+            rawTx.value,
+            rawTx.fee);
+
+        tx.build();
+
+        const signature = account.sign(tx.toString());
+
+        tx.setSignature(signature);
+
+        return node.broadcastTransaction(tx.toString());
     }
 }
 
