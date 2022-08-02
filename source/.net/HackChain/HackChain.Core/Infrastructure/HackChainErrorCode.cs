@@ -16,5 +16,8 @@
         Transaction_Duplicate,
 
         Block_Invalid_Operation = 2000,
+
+        Wallet_PrivateKey_Missing = 3000,
+        Wallet_Invalid_Recipient
     }
 }
