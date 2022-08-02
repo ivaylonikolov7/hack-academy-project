@@ -12,11 +12,13 @@ namespace HackChain.ConsoleTests
         {
             //TestKeys();
 
-            TestTransaction();
+            //TestTransaction();
+
+            TestMinerTransaction();
 
             //TestBlock();
-
         }
+
 
         private static void TestKeys()
         {
@@ -117,6 +119,75 @@ Transaction isValid:
 '{transaction.VerifySignature()}'
 ");
 
+
+        }
+        private static void TestMinerTransaction()
+        {
+            var senderPrivateKey = CryptoUtilities.PrivateKeyFromPrivateKeyHex("98a980361af2a0574b96342ac0790e243cc032cb4de2de554b8061efc06d35c6");
+            var publicKey = CryptoUtilities.PublicKeyFromPrivateKey(senderPrivateKey);
+
+
+            var transaction = new Transaction()
+            {
+                Sender = "04fbff67f613b7854c63e5b06eee5e880fd2ff618558e97a1cce73778579a94050c0381b973f34c192cba1662459e00902c2fbd5efd358844f964a94c39f69b91b",
+                Recipient = "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
+                Nonce = 1,
+                Value = 10,
+                Fee = 1
+            };
+
+            var rawTransaction = transaction.Serialize();
+            var forHashing = transaction.SerializeForHashing();
+
+            byte[] forHashingUTF8Bytes = Encoding.UTF8.GetBytes(forHashing);
+            byte[] hashBytesManual = CryptoUtilities.CalculateSHA256(forHashingUTF8Bytes);
+            string hashManualHEX = Convert.ToHexString(hashBytesManual);
+
+            var hash = transaction.CalculateHash();
+            transaction.Hash = hash;
+
+            bool hashMatch = hashManualHEX == hash;
+
+            byte[] hashBytes = Encoding.UTF8.GetBytes(hash);
+            byte[] signatureBytes = CryptoUtilities.SignData(hashBytes, senderPrivateKey);
+
+            var transactionSignature = transaction.Sign(senderPrivateKey);
+            transaction.Signature = transactionSignature;
+
+            string fullTransaction = transaction.Serialize();
+
+            Console.WriteLine(
+$@"
+Transaction raw:
+'{rawTransaction}'
+
+Transaction for hashing:
+'{forHashing}'
+
+Transaction for hashing bytes using UTF8:
+'{BytesToString(forHashingUTF8Bytes)}'
+
+Transaction hash bytes:
+'{BytesToString(hashBytesManual)}'
+
+Transaction hash:
+'{hash}'
+
+Transaction hash bytes using UTF8 for signing:
+'{BytesToString(hashBytes)}'
+
+Transaction signature bytes:
+'{BytesToString(signatureBytes)}'
+
+Transaction signature:
+'{transactionSignature}'
+
+Transaction full:
+'{fullTransaction}'
+
+Transaction isValid:
+'{transaction.VerifySignature()}'
+");
 
         }
 
