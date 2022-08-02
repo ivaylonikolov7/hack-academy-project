@@ -26,7 +26,7 @@ namespace HackChain.Core.Services
                     HackChainErrorCode.Transaction_Duplicate);
             }
 
-            transaction.IsValidForNextBlock = CalculateIsValidForNextBlock(transaction);
+            ValidateBalanceAndNonce(transaction);
 
             _db.Transactions.Add(transaction);
 
@@ -50,16 +50,27 @@ namespace HackChain.Core.Services
             return transactions;
         }
 
-        private bool CalculateIsValidForNextBlock(Transaction transaction)
+        private void ValidateBalanceAndNonce(Transaction transaction)
         {
             var account = _db.Accounts.FirstOrDefault(a => a.Address == transaction.Sender);
             long nextValidNonce = (account?.Nonce ?? 0) + 1;
             bool hasValidNonce = transaction.Nonce == nextValidNonce;
+            // nonse should be precisely the next one
+            if (hasValidNonce == false)
+            {
+                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Nonce='{transaction.Nonce}'. The next valid Nonce is '{nextValidNonce}'.",
+                    HackChainErrorCode.Transaction_Invalid_Nonce);
+            }
 
-            decimal availableBallance = account?.Balance ?? 0;
-            bool hasEnoughFunds = availableBallance >= transaction.Value + transaction.Fee;
-
-            return hasValidNonce && hasEnoughFunds;
+            long availableBallance = account?.Balance ?? 0;
+            long neededBalance = transaction.Value + transaction.Fee;
+            bool hasEnoughFunds = availableBallance >= neededBalance;
+            // account should have enough funds
+            if (hasEnoughFunds == false)
+            {
+                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] Value+Fee='{neededBalance}' is greater then the available balance='{availableBallance}'.",
+                    HackChainErrorCode.Transaction_Insufficient_Balance);
+            }
         }
     }
 }
