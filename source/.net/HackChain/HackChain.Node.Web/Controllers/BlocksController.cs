@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HackChain.Core.Interfaces;
 using HackChain.Node.Web.DTO;
+using HackChain.Node.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HackChain.Node.Web.Controllers
@@ -22,21 +23,22 @@ namespace HackChain.Node.Web.Controllers
 
         [Route("{index}")]
         [HttpGet]
-        public async Task<ActionResult<BlockDTO>> GetByAddress(long index)
+        public async Task<ActionResult<ApiResponse<BlockDTO>>> GetByAddress(long index)
         {
             var block = await _nodeService.GetBlockByIndex(index);
             var result = _mapper.Map<BlockDTO>(block);
 
-
-            return result;
+            return ApiResponse<BlockDTO>.Successful(result);
         }
 
         [Route("mine")]
         [HttpPost]
-        public async Task<ActionResult<bool>> Mine(long index)
+        public async Task<ActionResult<ApiResponse<BlockDTO>>> Mine(long index)
         {
-            await _nodeService.MineBlock();
-            return true;
+            var block = await _nodeService.MineBlock();
+            var result = _mapper.Map<BlockDTO>(block);
+
+            return ApiResponse<BlockDTO>.Successful(result);
         }
     }
 }

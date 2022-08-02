@@ -26,13 +26,6 @@ namespace HackChain.Core.Services
             _settings = settings;
         }
 
-        public async Task<Account> GetAccountByAddress(string address)
-        {
-            var account = await _db.Accounts.FirstOrDefaultAsync(a => a.Address == address);
-
-            return account;
-        }
-
         public async Task<Block> GetBlockByIndex(long index)
         {
             var block = await _db.Blocks
@@ -42,7 +35,7 @@ namespace HackChain.Core.Services
             return block;
         }
 
-        public async Task MineBlock()
+        public async Task<Block> MineBlock()
         {
             var transactions = await _db.Transactions
                 .Where(tr => tr.BlockId == null && tr.IsValidForNextBlock)
@@ -69,6 +62,8 @@ namespace HackChain.Core.Services
 
             await UpdateAccounts(currentBlock);
             await _db.SaveChangesAsync();
+
+            return currentBlock;
         }
 
         private async Task UpdateAccounts(Block currentBlock)

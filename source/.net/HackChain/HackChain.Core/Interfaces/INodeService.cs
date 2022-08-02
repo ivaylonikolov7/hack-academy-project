@@ -6,8 +6,6 @@ namespace HackChain.Core.Interfaces
     {
 
         Task<Block> GetBlockByIndex(long index);
-        Task MineBlock();
-
-        Task<Account> GetAccountByAddress(string address);
+        Task<Block> MineBlock();
     }
 }

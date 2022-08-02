@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HackChain.Core.Interfaces;
 using HackChain.Node.Web.DTO;
+using HackChain.Node.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HackChain.Node.Web.Controllers
@@ -9,26 +10,26 @@ namespace HackChain.Node.Web.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private INodeService _nodeService;
+        private IAccountService _accountService;
         private IMapper _mapper;
 
         public AccountsController(
-            INodeService nodeService,
+            IAccountService accountService,
             IMapper mapper)
         {
-            _nodeService = nodeService;
+            _accountService = accountService;
             _mapper = mapper;
         }
 
         [Route("{address}")]
         [HttpGet]
-        public async Task<ActionResult<AccountDTO>> GetByAddress(string address)
+        public async Task<ActionResult<ApiResponse<AccountDTO>>> GetByAddress(string address)
         {
-            var account = await _nodeService.GetAccountByAddress(address);
+            var account = await _accountService.GetAccountByAddress(address);
             var result = _mapper.Map<AccountDTO>(account);
 
 
-            return result;
+            return ApiResponse<AccountDTO>.Successful(result);
         }
     }
 }

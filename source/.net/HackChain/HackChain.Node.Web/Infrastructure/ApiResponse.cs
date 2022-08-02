@@ -23,5 +23,10 @@ namespace HackChain.Node.Web.Infrastructure
 
         [JsonProperty("data")]
         public T Data { get; set; }
+
+        public static ApiResponse<T> Successful(T data)
+        {
+            return new ApiResponse<T>() { Data = data };
+        }
     }
 }

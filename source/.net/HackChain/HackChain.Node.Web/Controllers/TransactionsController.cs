@@ -2,6 +2,7 @@
 using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
 using HackChain.Node.Web.DTO;
+using HackChain.Node.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HackChain.Node.Web.Controllers
@@ -23,33 +24,34 @@ namespace HackChain.Node.Web.Controllers
 
         [Route("add")]
         [HttpPost]
-        public async Task<ActionResult<TransactionDTO>> Add([FromBody] TransactionDTO transaction)
+        public async Task<ActionResult<ApiResponse<TransactionDTO>>> Add([FromBody] TransactionDTO transaction)
         {
             var internalTransaction = _mapper.Map<Transaction>(transaction);
             await _transactionService.AddTransaction(internalTransaction);
 
-            return transaction;
+
+            return ApiResponse<TransactionDTO>.Successful(transaction);
         }
 
         [Route("{hash}")]
         [HttpGet]
-        public async Task<ActionResult<TransactionDTO>> GetByHash(string hash)
+        public async Task<ActionResult<ApiResponse<TransactionDTO>>> GetByHash(string hash)
         {
             var transaction = await _transactionService.GetTransactionByHash(hash);
             var result = _mapper.Map<TransactionDTO>(transaction);
 
 
-            return result;
+            return ApiResponse<TransactionDTO>.Successful(result);
         }
 
         [Route("pending")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TransactionDTO>>> GetPending()
+        public async Task<ActionResult<ApiResponse<IEnumerable<TransactionDTO>>>> GetPending()
         {
             var transactions = await _transactionService.GetPendingTransactions();
             List<TransactionDTO> result = _mapper.Map<List<TransactionDTO>>(transactions);
 
-            return result;
+            return ApiResponse<IEnumerable<TransactionDTO>>.Successful(result);
         }
     }
 }

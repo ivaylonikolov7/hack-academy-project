@@ -19,6 +19,12 @@ namespace HackChain.Core.Services
         {
             _db = db;
         }
+        public async Task<Account> GetAccountByAddress(string address)
+        {
+            var account = await _db.Accounts.FirstOrDefaultAsync(a => a.Address == address);
+
+            return account;
+        }
 
         public async Task ApplyTransactionData(Transaction transaction)
         {
