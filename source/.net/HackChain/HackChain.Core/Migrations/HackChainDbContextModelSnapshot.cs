@@ -86,9 +86,6 @@ namespace HackChain.Core.Migrations
                     b.Property<long>("Fee")
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("IsValidForNextBlock")
-                        .HasColumnType("bit");
-
                     b.Property<long>("Nonce")
                         .HasColumnType("bigint");
 

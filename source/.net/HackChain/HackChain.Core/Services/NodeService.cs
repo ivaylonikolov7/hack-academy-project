@@ -38,12 +38,11 @@ namespace HackChain.Core.Services
         public async Task<Block> MineBlock()
         {
             var transactions = await _db.Transactions
-                .Where(tr => tr.BlockId == null && tr.IsValidForNextBlock)
+                .Where(tr => tr.BlockId == null)
                 .OrderByDescending(tr => tr.Fee)
                 .Take(10)
                 .ToListAsync();
-            AddCoinbaseTransaction(transactions);
-
+            
             var lastBlock = await GetLastBlock();
 
             var currentBlock = new Block
@@ -54,6 +53,7 @@ namespace HackChain.Core.Services
                 Timestamp = DateTime.UtcNow.ToUnixTime()
             };
 
+            AddCoinbaseTransaction(transactions, currentBlock.Index);
             currentBlock.AddTransactions(transactions);
             CalculateBlockHash(currentBlock);
 
@@ -106,33 +106,22 @@ namespace HackChain.Core.Services
                 Timestamp = DateTime.UtcNow.ToUnixTime()
             };
 
-            var transactions = GetGenesisBlockTransactions();
-            AddCoinbaseTransaction(transactions);
-            genesisBlock.AddTransactions(transactions);
+
+            AddCoinbaseTransaction(new List<Transaction>(), genesisBlock.Index);
 
             CalculateBlockHash(genesisBlock);
 
             return genesisBlock;
         }
 
-        private void AddCoinbaseTransaction(List<Transaction> transactions)
+        private void AddCoinbaseTransaction(List<Transaction> transactions, long blockIndex)
         {
             long totalFees = transactions.Sum(tr => tr.Fee);
 
-            var coinbaseTransaction = Transaction.Coinbase(_settings.MinerAddress, _settings.CoinbaseValue + totalFees);
+            var coinbaseTransaction = Transaction.Coinbase(_settings.MinerAddress, blockIndex, _settings.CoinbaseValue + totalFees);
             transactions.Add(coinbaseTransaction);
         }
 
-        private List<Transaction> GetGenesisBlockTransactions()
-        {
-            //TODO: read json file, generate Coinbase transactions in a loop
-            return new List<Transaction>()
-            {
-                Transaction.Coinbase(
-                    "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
-                    100000)
-            };
-        }
 
         private void CalculateBlockHash(Block block)
         {

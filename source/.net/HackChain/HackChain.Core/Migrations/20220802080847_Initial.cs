@@ -51,7 +51,6 @@ namespace HackChain.Core.Migrations
                     Value = table.Column<long>(type: "bigint", nullable: false),
                     Fee = table.Column<long>(type: "bigint", nullable: false),
                     Signature = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsValidForNextBlock = table.Column<bool>(type: "bit", nullable: false),
                     BlockId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>

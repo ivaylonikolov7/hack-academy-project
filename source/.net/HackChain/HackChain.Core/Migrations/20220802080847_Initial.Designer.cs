@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HackChain.Core.Migrations
 {
     [DbContext(typeof(HackChainDbContext))]
-    [Migration("20220802060137_Initial")]
+    [Migration("20220802080847_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,9 +87,6 @@ namespace HackChain.Core.Migrations
 
                     b.Property<long>("Fee")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("IsValidForNextBlock")
-                        .HasColumnType("bit");
 
                     b.Property<long>("Nonce")
                         .HasColumnType("bigint");

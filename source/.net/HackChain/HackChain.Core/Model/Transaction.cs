@@ -19,18 +19,16 @@ namespace HackChain.Core.Model
         public string Hash { get; set; }
         public string Signature { get; set; }
 
-        public bool IsValidForNextBlock { get; set; }
-
         public Guid? BlockId { get; set; }
         public virtual Block Block { get; set; }
 
-        public static Transaction Coinbase(string recipient, long value)
+        public static Transaction Coinbase(string recipient, long nonce, long value)
         {
             var transaction = new Transaction
             {
-                Sender = DateTime.UtcNow.Ticks.ToString(),
+                Sender = "",
                 Recipient = recipient,
-                Nonce = 1,
+                Nonce = nonce,
                 Value = value,
                 Signature = "Coinbase"
             };
