@@ -23,7 +23,7 @@ namespace HackChain.Node.Web.Controllers
 
         [Route("add")]
         [HttpPost]
-        public async Task<ActionResult<TransactionDTO>> AddTransaction([FromBody] TransactionDTO transaction)
+        public async Task<ActionResult<TransactionDTO>> Add([FromBody] TransactionDTO transaction)
         {
             var internalTransaction = _mapper.Map<Transaction>(transaction);
             await _transactionService.AddTransaction(internalTransaction);

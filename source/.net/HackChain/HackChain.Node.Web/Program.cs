@@ -17,6 +17,7 @@ namespace HackChain.Node.Web
             );
             services.AddRazorPages();
             services.AddAutoMapper(typeof(Program));
+            services.AddCors();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -63,6 +64,11 @@ namespace HackChain.Node.Web
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors(cors => cors
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
