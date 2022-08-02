@@ -25,7 +25,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"Sender\": \"04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296\",\r\n  \"Recipient\": \"044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda\",\r\n  \"Nonce\": \"1\",\r\n  \"Value\": \"1000\",\r\n  \"Fee\": \"5\",\r\n  \"Hash\": \"00e7db18e626479cca9cd9d170eaef07f50a0c27d7d090c60da0ff7ef9b7d088\",\r\n  \"Signature\": \"MEQCICrgao5NeTMp4kpXKHLtYpW0fFGD/im3THAp5H/YhsHKAiAVP/40L/ybdjdHUQbCYhUV18KLJa+JVnO3Hc4e+kWe7w==\"\r\n}"
+							"raw": "{\r\n  \"Sender\": \"04fbff67f613b7854c63e5b06eee5e880fd2ff618558e97a1cce73778579a94050c0381b973f34c192cba1662459e00902c2fbd5efd358844f964a94c39f69b91b\",\r\n  \"Recipient\": \"044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda\",\r\n  \"Nonce\": 1,\r\n  \"Value\": 10,\r\n  \"Fee\": 1,\r\n  \"Hash\": \"d0f52f92f2da8484aa53202711bffec59e7e649da86022cd1d41dc9a5e9d6ca1\",\r\n  \"Signature\": \"MEQCIF0icPYhSK1zf3sWSLq8PP7sGI3qXjYyy6GgnpS5ttJTAiB3m9ICRl/1/7CYfFo1xdhQgdpfs7afBpXnpdH4E02fRQ==\"\r\n}"
 						},
 						"description": ""
 					},
@@ -34,7 +34,7 @@
 				{
 					"name": "GetByHash",
 					"request": {
-						"url": "{{baseUrl}}/api/transactions/00e7db18e626479cca9cd9d170eaef07f50a0c27d7d090c60da0ff7ef9b7d088",
+						"url": "{{baseUrl}}/api/transactions/070e9e641376bdde65f42555350cd8880a60b5c433046d484cd7aea5db9b8775",
 						"method": "GET",
 						"header": [
 							{
@@ -80,7 +80,7 @@
 				{
 					"name": "GetByAddress",
 					"request": {
-						"url": "{{baseUrl}}/api/accounts/asdasdasd",
+						"url": "{{baseUrl}}/api/accounts/04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
 						"method": "GET",
 						"header": [
 							{
@@ -137,7 +137,33 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"Sender\": \"04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296\",\r\n  \"Recipient\": \"044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda\",\r\n  \"Nonce\": \"1\",\r\n  \"Value\": \"1000\",\r\n  \"Fee\": \"5\",\r\n  \"Hash\": \"00e7db18e626479cca9cd9d170eaef07f50a0c27d7d090c60da0ff7ef9b7d0881\",\r\n  \"Signature\": \"MEQCICrgao5NeTMp4kpXKHLtYpW0fFGD/im3THAp5H/YhsHKAiAVP/40L/ybdjdHUQbCYhUV18KLJa+JVnO3Hc4e+kWe7w==\"\r\n}"
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Faucet",
+			"description": "",
+			"item": [
+				{
+					"name": "FundAddress",
+					"request": {
+						"url": "{{baseUrl}}/api/faucet/fund/04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
 						},
 						"description": ""
 					},
