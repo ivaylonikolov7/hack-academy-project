@@ -24,7 +24,7 @@ namespace HackChain.Core.Services
         {
             if (transaction.IsCoinbase() == false)
             {
-                decimal spentAmount = transaction.Value + transaction.Fee;
+                long spentAmount = transaction.Value + transaction.Fee;
                 var senderAccount = await GetAccount(transaction.Sender);
                 senderAccount.Balance -= spentAmount;
                 senderAccount.Nonce += 1;

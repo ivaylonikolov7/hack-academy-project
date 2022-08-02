@@ -6,8 +6,8 @@
         public string Recipient { get; set; }
         public decimal Nonce { get; set; }
         public string? Data { get; set; }
-        public decimal Value { get; set; }
-        public decimal Fee { get; set; }
+        public long Value { get; set; }
+        public long Fee { get; set; }
         public string Hash { get; set; }
         public string Signature { get; set; }
     }

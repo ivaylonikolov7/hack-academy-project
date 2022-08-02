@@ -34,11 +34,6 @@ namespace HackChain.Core.Extensions
         }
         public static string Sign(this Transaction transaction, ECPrivateKeyParameters privateKey)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            };
-
             var hash = transaction.CalculateHash();
             var signature = CryptoUtilities.SignData(hash, privateKey);
 

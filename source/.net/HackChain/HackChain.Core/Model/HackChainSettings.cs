@@ -3,7 +3,7 @@
     public class HackChainSettings
     {
         public int Difficulty { get; set; }
-        public decimal CoinbaseValue { get; set; }
+        public long CoinbaseValue { get; set; }
         public string MinerAddress { get; set; }
     }
 }

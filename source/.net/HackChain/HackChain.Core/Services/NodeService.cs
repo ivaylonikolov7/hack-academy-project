@@ -122,7 +122,7 @@ namespace HackChain.Core.Services
 
         private void AddCoinbaseTransaction(List<Transaction> transactions)
         {
-            decimal totalFees = transactions.Sum(tr => tr.Fee);
+            long totalFees = transactions.Sum(tr => tr.Fee);
 
             var coinbaseTransaction = Transaction.Coinbase(_settings.MinerAddress, _settings.CoinbaseValue + totalFees);
             transactions.Add(coinbaseTransaction);

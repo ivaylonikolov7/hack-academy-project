@@ -14,8 +14,8 @@ namespace HackChain.Core.Model
         public string Recipient { get; set; }
         public long Nonce { get; set; }
         public string? Data { get; set; }
-        public decimal Value { get; set; }
-        public decimal Fee { get; set; }
+        public long Value { get; set; }
+        public long Fee { get; set; }
         public string Hash { get; set; }
         public string Signature { get; set; }
 
@@ -24,7 +24,7 @@ namespace HackChain.Core.Model
         public Guid? BlockId { get; set; }
         public virtual Block Block { get; set; }
 
-        public static Transaction Coinbase(string recipient, decimal value)
+        public static Transaction Coinbase(string recipient, long value)
         {
             var transaction = new Transaction
             {

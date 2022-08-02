@@ -14,7 +14,7 @@ namespace HackChain.Core.Migrations
                 columns: table => new
                 {
                     Address = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,0)", nullable: false),
+                    Balance = table.Column<long>(type: "bigint", nullable: false),
                     Nonce = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
@@ -48,8 +48,8 @@ namespace HackChain.Core.Migrations
                     Recipient = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Nonce = table.Column<long>(type: "bigint", nullable: false),
                     Data = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Value = table.Column<decimal>(type: "decimal(18,0)", nullable: false),
-                    Fee = table.Column<decimal>(type: "decimal(18,0)", nullable: false),
+                    Value = table.Column<long>(type: "bigint", nullable: false),
+                    Fee = table.Column<long>(type: "bigint", nullable: false),
                     Signature = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsValidForNextBlock = table.Column<bool>(type: "bit", nullable: false),
                     BlockId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)

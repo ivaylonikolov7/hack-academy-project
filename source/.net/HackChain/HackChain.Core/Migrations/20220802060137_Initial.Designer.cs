@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HackChain.Core.Migrations
 {
     [DbContext(typeof(HackChainDbContext))]
-    [Migration("20220731210641_Initial")]
+    [Migration("20220802060137_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,8 +29,8 @@ namespace HackChain.Core.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,0)");
+                    b.Property<long>("Balance")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("Nonce")
                         .HasColumnType("bigint");
@@ -85,8 +85,8 @@ namespace HackChain.Core.Migrations
                     b.Property<string>("Data")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Fee")
-                        .HasColumnType("decimal(18,0)");
+                    b.Property<long>("Fee")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsValidForNextBlock")
                         .HasColumnType("bit");
@@ -106,8 +106,8 @@ namespace HackChain.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Value")
-                        .HasColumnType("decimal(18,0)");
+                    b.Property<long>("Value")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Hash");
 
