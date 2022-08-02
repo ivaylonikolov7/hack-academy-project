@@ -69,11 +69,12 @@ Public key (hex): '{publicKeyHex}'
 
             byte[] forHashingUTF8Bytes = Encoding.UTF8.GetBytes(forHashing);
             byte[] hashBytesManual = CryptoUtilities.CalculateSHA256(forHashingUTF8Bytes);
-            string hashManualBase64 = string.Concat(hashBytesManual.Select(b => b.ToString("x2")));
+            string hashManualHEX = Convert.ToHexString(hashBytesManual);
 
             var hash = transaction.CalculateHash();
             transaction.Hash = hash;
 
+            bool hashMatch = hashManualHEX == hash;
 
             byte[] hashBytes = Encoding.UTF8.GetBytes(hash);
             byte[] signatureBytes = CryptoUtilities.SignData(hashBytes, senderPrivateKey);
@@ -100,7 +101,7 @@ Transaction hash bytes:
 Transaction hash:
 '{hash}'
 
-Transaction hash bytes for signing:
+Transaction hash bytes using UTF8 for signing:
 '{BytesToString(hashBytes)}'
 
 Transaction signature bytes:
