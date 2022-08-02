@@ -2,6 +2,7 @@
 using HackChain.Core.Model;
 using HackChain.Utilities;
 using Org.BouncyCastle.Crypto.Parameters;
+using System.Text;
 
 namespace HackChain.ConsoleTests
 {
@@ -9,11 +10,12 @@ namespace HackChain.ConsoleTests
     {
         public static void Main(string[] args)
         {
-            TestKeys();
+            //TestKeys();
 
             TestTransaction();
 
-            TestBlock();
+            //TestBlock();
+
         }
 
         private static void TestKeys()
@@ -65,8 +67,16 @@ Public key (hex): '{publicKeyHex}'
             var rawTransaction = transaction.Serialize();
             var forHashing = transaction.SerializeForHashing();
 
+            byte[] forHashingUTF8Bytes = Encoding.UTF8.GetBytes(forHashing);
+            byte[] hashBytesManual = CryptoUtilities.CalculateSHA256(forHashingUTF8Bytes);
+            string hashManualBase64 = string.Concat(hashBytesManual.Select(b => b.ToString("x2")));
+
             var hash = transaction.CalculateHash();
             transaction.Hash = hash;
+
+
+            byte[] hashBytes = Encoding.UTF8.GetBytes(hash);
+            byte[] signatureBytes = CryptoUtilities.SignData(hashBytes, senderPrivateKey);
 
             var transactionSignature = transaction.Sign(senderPrivateKey);
             transaction.Signature = transactionSignature;
@@ -81,8 +91,20 @@ Transaction raw:
 Transaction for hashing:
 '{forHashing}'
 
+Transaction for hashing bytes using UTF8:
+'{BytesToString(forHashingUTF8Bytes)}'
+
+Transaction hash bytes:
+'{BytesToString(hashBytesManual)}'
+
 Transaction hash:
 '{hash}'
+
+Transaction hash bytes for signing:
+'{BytesToString(hashBytes)}'
+
+Transaction signature bytes:
+'{BytesToString(signatureBytes)}'
 
 Transaction signature:
 '{transactionSignature}'
@@ -95,6 +117,11 @@ Transaction isValid:
 ");
 
 
+        }
+
+        private static string BytesToString(byte[] bytes)
+        {
+            return $"Length['{bytes.Length}'] = '{String.Join(" ", bytes)}'";
         }
 
         private static void TestBlock()
