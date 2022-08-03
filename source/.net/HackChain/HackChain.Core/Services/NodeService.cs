@@ -106,8 +106,9 @@ namespace HackChain.Core.Services
                 Timestamp = DateTime.UtcNow.ToUnixTime()
             };
 
-
-            AddCoinbaseTransaction(new List<Transaction>(), genesisBlock.Index);
+            var transactions = new List<Transaction>();
+            AddCoinbaseTransaction(transactions, genesisBlock.Index);
+            genesisBlock.AddTransactions(transactions);
 
             CalculateBlockHash(genesisBlock);
 
