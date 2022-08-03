@@ -12,7 +12,7 @@
 			"description": "",
 			"item": [
 				{
-					"name": "Add",
+					"name": "Transactions Add",
 					"request": {
 						"url": "{{baseUrl}}/api/transactions/add",
 						"method": "POST",
@@ -32,7 +32,7 @@
 					"response": []
 				},
 				{
-					"name": "GetByHash",
+					"name": "Transactions GetByHash",
 					"request": {
 						"url": "{{baseUrl}}/api/transactions/070e9e641376bdde65f42555350cd8880a60b5c433046d484cd7aea5db9b8775",
 						"method": "GET",
@@ -52,7 +52,7 @@
 					"response": []
 				},
 				{
-					"name": "Pending",
+					"name": "Transactions GetPending",
 					"request": {
 						"url": "{{baseUrl}}/api/transactions/pending",
 						"method": "GET",
@@ -78,7 +78,7 @@
 			"description": "",
 			"item": [
 				{
-					"name": "GetByAddress",
+					"name": "Account GetByAddress",
 					"request": {
 						"url": "{{baseUrl}}/api/accounts/04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
 						"method": "GET",
@@ -104,7 +104,7 @@
 			"description": "",
 			"item": [
 				{
-					"name": "GetByIndex",
+					"name": "Block GetByIndex",
 					"request": {
 						"url": "{{baseUrl}}/api/blocks/1",
 						"method": "GET",
@@ -124,7 +124,7 @@
 					"response": []
 				},
 				{
-					"name": "Mine",
+					"name": "Block Mine",
 					"request": {
 						"url": "{{baseUrl}}/api/blocks/mine",
 						"method": "POST",
@@ -150,10 +150,36 @@
 			"description": "",
 			"item": [
 				{
-					"name": "FundAddress",
+					"name": "Faucet FundAddress",
 					"request": {
 						"url": "{{baseUrl}}/api/faucet/fund/04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
 						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Node",
+			"description": "",
+			"item": [
+				{
+					"name": "Node Status",
+					"request": {
+						"url": "{{baseUrl}}/api/node/status",
+						"method": "GET",
 						"header": [
 							{
 								"key": "Content-Type",
