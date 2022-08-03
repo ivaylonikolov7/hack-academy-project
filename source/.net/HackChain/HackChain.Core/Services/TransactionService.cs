@@ -71,6 +71,13 @@ namespace HackChain.Core.Services
                 throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] Value+Fee='{neededBalance}' is greater then the available balance='{availableBallance}'.",
                     HackChainErrorCode.Transaction_Insufficient_Balance);
             }
+
+            var existingTransactionFromSameAddress = _db.Transactions.FirstOrDefault(t => t.Sender == transaction.Sender && t.Nonce == transaction.Nonce);
+            if (existingTransactionFromSameAddress != null)
+            {
+                throw new HackChainException($"There is already pending Transaction[Hash='{existingTransactionFromSameAddress.Hash}'] from the same address='{transaction.Sender}' with the same Nonce='{transaction.Nonce}'.",
+                    HackChainErrorCode.Transaction_Duplicate);
+            }
         }
     }
 }
