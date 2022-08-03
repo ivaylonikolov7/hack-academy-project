@@ -7,5 +7,6 @@ namespace HackChain.Core.Interfaces
 
         Task<Block> GetBlockByIndex(long index);
         Task<Block> MineBlock();
+        Task<NodeStatus> GetNodeStatus();
     }
 }

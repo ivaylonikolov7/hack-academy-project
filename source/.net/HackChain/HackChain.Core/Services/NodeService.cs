@@ -3,14 +3,13 @@ using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
 using Microsoft.EntityFrameworkCore;
 using HackChain.Core.Extensions;
-using HackChain.Core.Extensions;
-using System.Text;
 using HackChain.Utilities;
 
 namespace HackChain.Core.Services
 {
     public class NodeService: INodeService
     {
+        private static bool _isMining = false;
         private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
         private HackChainDbContext _db;
         private IAccountService _accountService;
@@ -37,33 +36,47 @@ namespace HackChain.Core.Services
 
         public async Task<Block> MineBlock()
         {
-            var transactions = await _db.Transactions
-                .Where(tr => tr.BlockId == null)
-                .OrderByDescending(tr => tr.Fee)
-                .Take(10)
-                .ToListAsync();
-            
-            var lastBlock = await GetLastBlock();
-
-            var currentBlock = new Block
+            if(_isMining)
             {
-                Index = lastBlock.Index + 1,
-                Difficulty = _settings.Difficulty,
-                PreviousBlockHash = lastBlock.CurrentBlockHash,
-                Timestamp = DateTime.UtcNow.ToUnixTime()
-            };
+                return await GetLastBlock(); ;
+            }
 
-            AddCoinbaseTransaction(transactions, currentBlock.Index);
-            currentBlock.AddTransactions(transactions);
-            CalculateBlockHash(currentBlock);
+            _isMining = true;
+            try
+            {
+                var transactions = await _db.Transactions
+                    .Where(tr => tr.BlockId == null)
+                    .OrderByDescending(tr => tr.Fee)
+                    .Take(10)
+                    .ToListAsync();
 
-            _db.Blocks.Add(currentBlock);
-            await _db.SaveChangesAsync();
+                var lastBlock = await GetLastBlock();
 
-            await UpdateAccounts(currentBlock);
-            await _db.SaveChangesAsync();
+                var currentBlock = new Block
+                {
+                    Index = lastBlock.Index + 1,
+                    Difficulty = _settings.Difficulty,
+                    PreviousBlockHash = lastBlock.CurrentBlockHash,
+                    Timestamp = DateTime.UtcNow.ToUnixTime()
+                };
 
-            return currentBlock;
+                AddCoinbaseTransaction(transactions, currentBlock.Index);
+                currentBlock.AddTransactions(transactions);
+                CalculateBlockHash(currentBlock);
+
+                _db.Blocks.Add(currentBlock);
+                await _db.SaveChangesAsync();
+
+                await UpdateAccounts(currentBlock);
+                await _db.SaveChangesAsync();
+                return currentBlock;
+            }
+            finally
+            {
+                _isMining = false;
+            }
+            
+            return null;
         }
 
         private async Task UpdateAccounts(Block currentBlock)
@@ -79,7 +92,6 @@ namespace HackChain.Core.Services
         {
             var lastBlock = await _db.Blocks
                 .OrderByDescending(b => b.Index)
-                .Take(1)
                 .FirstOrDefaultAsync();
 
             if(lastBlock == null)
@@ -139,6 +151,27 @@ namespace HackChain.Core.Services
 
             block.Nonce = nonce;
             block.CurrentBlockHash = hash;
+        }
+
+        public async Task<NodeStatus> GetNodeStatus()
+        {
+            var lastBlock = await _db.Blocks.OrderByDescending(b => b.Index).FirstOrDefaultAsync();
+
+            var status = new NodeStatus()
+            {
+                NodeId = _settings.NodeId,
+                BaseUrl = _settings.BaseUrl,
+                LastBlockIndex = lastBlock?.Index ?? 0,
+                LastBlockHash = lastBlock?.CurrentBlockHash ?? string.Empty,
+                LastBlockTimestamp = lastBlock?.Timestamp ?? 0,
+                NonZeroAddressesCount = await _db.Accounts.CountAsync(a => a.Balance != 0),
+                ProcessedTransactionsCount = await _db.Transactions.CountAsync(t => t.BlockId != null),
+                PendingTransactionsCount = await _db.Transactions.CountAsync(t => t.BlockId == null),
+                IsMining = _isMining,
+                Status = NodeStatusType.Synced
+            };
+
+            return status;
         }
     }
 }
