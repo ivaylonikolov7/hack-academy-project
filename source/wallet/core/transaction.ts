@@ -26,14 +26,12 @@ export default class {
             Recipient: this.recipient,
             Nonce: this.nonce,
             Value: this.value,
-            Fee: this.fee,
-            Hash: '',
-            Signature: '',
+            Fee: this.fee
         };
 
         this.hash = sha256(JSON.stringify(transaction));
 
-        transaction.Hash = this.hash;
+        // transaction.Hash = this.hash;
 
         this.rawTx = transaction;
 
@@ -41,26 +39,26 @@ export default class {
     }
 
     public validate() {
-        if (!this.sender) {
-            throw new Error('Tx: valid sender is required');
-        }
+        // if (!this.sender) {
+        //     throw new Error('Tx: valid sender is required');
+        // }
 
-        if (!this.recipient) {
-            throw new Error('Tx: valid recipient is required');
-        }
+        // if (!this.recipient) {
+        //     throw new Error('Tx: valid recipient is required');
+        // }
 
-        if (!this.nonce && this.nonce !== 0) {
-            throw new Error('Tx: valid nonce is required');
-        }
+        // if (!this.nonce && this.nonce !== 0) {
+        //     throw new Error('Tx: valid nonce is required');
+        // }
 
-        if (!this.value) {
-            console.log(this.value);
-            throw new Error('Tx: valid value is required');
-        }
+        // if (!this.value) {
+        //     console.log(this.value);
+        //     throw new Error('Tx: valid value is required');
+        // }
 
-        if (!this.fee) {
-            throw new Error('Tx: valid fee is required');
-        }
+        // if (!this.fee && this.fee !== 0) {
+        //     throw new Error('Tx: valid fee is required');
+        // }
     }
 
     public toString() {
@@ -70,5 +68,9 @@ export default class {
     public setSignature(signature: string) {
         this.signature = signature;
         this.rawTx.Signature = signature;
+    }
+
+    public setHash() {
+        this.rawTx.Hash = this.hash;
     }
 };

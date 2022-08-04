@@ -12,13 +12,21 @@ class Node {
     async broadcastTransaction(tx: any) {
         const response = await fetch(`${this.url}/api/transactions/add`, {
             method: 'POST',
-            mode: 'cors',
             headers: new Headers({ 'content-type': 'application/json' }),
             body: tx,
         });
 
 
         return response.json();
+    }
+
+    async getAccountInfo(address: string) {
+        const response = await fetch(`${this.url}/api/accounts/${address}`, { method: 'GET' });
+
+
+        const { data } = await response.json();
+
+        return data;
     }
 }
 

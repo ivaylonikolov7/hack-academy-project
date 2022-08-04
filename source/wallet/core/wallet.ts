@@ -40,16 +40,19 @@ class Wallet {
         const node = this.nodes.get(this.selectedNode);
         const account = this.accounts.get(this.selectedAccount);
 
-        console.log(this.accounts);
+        const accountInfo = await node.getAccountInfo(this.selectedAccount);
 
-        // TODO: get account nonce
-        // TODO: check if account has enough funds
+        // if (!accountInfo) {
+        //     throw new Error('Cannot fetch account info');
+        // }
 
-        console.log(this.selectedAccount);
+        // if (accountInfo.balance < rawTx.value + rawTx.fee) {
+        //     throw new Error('Insufficient funds');
+        // }
 
         const tx = new Transaction(this.selectedAccount,
             rawTx.recipient,
-            rawTx.nonce,
+            1, // accountInfo.nonce
             rawTx.value,
             rawTx.fee);
 
@@ -57,7 +60,8 @@ class Wallet {
 
         const signature = account.sign(tx.toString());
 
-        tx.setSignature(signature);
+        tx.setSignature(signature.base64);
+        tx.setHash();
 
         return node.broadcastTransaction(tx.toString());
     }

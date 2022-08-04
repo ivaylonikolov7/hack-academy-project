@@ -1,7 +1,9 @@
 <script>
-import { RouterView } from 'vue-router';
+import { RouterView } from "vue-router";
+import Header from "./components/Header.vue";
 
 export default {
+  components: { Header },
   created() {
     console.log(this.$store.state.accounts);
   },
@@ -9,22 +11,30 @@ export default {
 </script>
 
 <template>
-  <RouterView />
+  <div class="app-container">
+    <Header />
+    <RouterView class="main-content" />
+  </div>
 </template>
 
 <style lang="scss">
 .app-container {
   background: #fff;
-  padding: 80px 40px;
   border: 1px solid #f0f0f2;
   border-radius: 4px;
   box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
   min-height: 60%;
-  max-height: 700px;
+  height: 600px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  flex-direction: column;
   max-width: 360px;
   word-break: break-word;
+  overflow: hidden;
+
+  .main-content {
+    padding: 80px 40px;
+    margin: auto;
+  }
 }
 </style>

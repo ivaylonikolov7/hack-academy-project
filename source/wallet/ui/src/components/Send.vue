@@ -1,11 +1,23 @@
 <template>
   <div>
-    Send
-    <input v-model="recipient" placeholder="Enter recipient address"/>
-    <input v-model="amount" placeholder="Enter amount to send" />
-    <input v-model="fee" placeholder="Enter fee amount" />
+    <h5>Send</h5>
+    <label for="">
+      Recipient
+      <input v-model="recipient" placeholder="Enter recipient address" />
+    </label>
+    <br />
+    <label for="">
+      Amount
+      <input v-model="amount" placeholder="Enter amount to send" />
+    </label>
+    <br />
+    <label for="">
+      Fee
+      <input v-model="fee" placeholder="Enter fee amount" />
+    </label>
+    <br />
 
-    <button @click="send">Send</button>
+    <button @click="send" class="btn btn-primary">Send</button>
   </div>
 </template>
 
@@ -20,10 +32,10 @@ export default {
   },
   methods: {
     send() {
-      this.$emit('send', {
+      this.$emit("send", {
         recipient: this.recipient,
-        value: this.amount,
-        fee: this.fee,
+        value: Number(this.amount),
+        fee: Number(this.fee),
       });
     },
   },

@@ -4,6 +4,6 @@ export type Transaction = {
     Nonce: Number,
     Value?: Number,
     Fee?: Number,
-    Hash: String,
-    Signature: String,
+    Hash?: String,
+    Signature?: String,
 };

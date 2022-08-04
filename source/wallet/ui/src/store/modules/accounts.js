@@ -20,7 +20,6 @@ export default {
   },
   getters: {
     active(state) {
-      console.log(state.list);
       return state.list[state.active];
     },
   },

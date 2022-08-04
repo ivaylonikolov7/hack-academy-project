@@ -13,7 +13,7 @@ export default {
   mutations: {
     set(state, nodes) {
       console.log(nodes);
-    }
+    },
   },
   getters: {
     active(state) {
