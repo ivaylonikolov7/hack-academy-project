@@ -16,3 +16,17 @@
 .App-link {
   color: #61dafb;
 }
+
+#address {
+  margin-right: 0.5rem;
+  height: 1.5rem;
+  width: 30rem;
+}
+
+#send {
+  height: 1.9rem;
+}
+
+#error-address {
+  color: red;
+}
