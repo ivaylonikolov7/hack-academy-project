@@ -1,7 +1,11 @@
 ﻿using HackChain.Core.Extensions;
 using HackChain.Core.Model;
 using HackChain.Utilities;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
+using Org.BouncyCastle.Math;
 using System.Text;
 
 namespace HackChain.ConsoleTests
@@ -12,9 +16,9 @@ namespace HackChain.ConsoleTests
         {
             //TestKeys();
 
-            //TestTransaction();
+            TestTransaction();
 
-            TestMinerTransaction();
+            //TestMinerTransaction();
 
             //TestBlock();
         }
@@ -79,10 +83,27 @@ Public key (hex): '{publicKeyHex}'
             bool hashMatch = hashManualHEX == hash;
 
             byte[] hashBytes = Encoding.UTF8.GetBytes(hash);
-            byte[] signatureBytes = CryptoUtilities.SignData(hashBytes, senderPrivateKey);
+            byte[] signatureBytes = CryptoUtilities.SignDataDeterministicly(hashBytes, senderPrivateKey);
+
+
+
+            var sha256digest = new Sha256Digest();
+            var ecdsaSigner = new ECDsaSigner1(new HMacDsaKCalculator(sha256digest));
+            ISigner signer = new DsaDigestSigner1(ecdsaSigner, sha256digest);
+            signer.Init(true, senderPrivateKey);
+            signer.BlockUpdate(hashBytes, 0, hashBytes.Length);
+
+
+            var signature = signer.GenerateSignature();
+
+
 
             var transactionSignature = transaction.Sign(senderPrivateKey);
             transaction.Signature = transactionSignature;
+
+            var isValid = CryptoUtilities.VerifySignature(publicKey, transactionSignature, hash);
+
+            Console.WriteLine("asfasdfsd f + " + isValid);
 
             string fullTransaction = transaction.Serialize();
 
