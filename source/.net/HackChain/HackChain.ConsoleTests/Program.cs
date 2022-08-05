@@ -83,8 +83,8 @@ Public key (hex): '{publicKeyHex}'
             bool hashMatch = hashManualHEX == hash;
 
             byte[] hashBytes = Encoding.UTF8.GetBytes(hash);
-            byte[] signatureBytes = CryptoUtilities.SignDataDeterministicly(hashBytes, senderPrivateKey);
-
+            byte[] signatureBytes = CryptoUtilities.SignDataDeterministicly(forHashingUTF8Bytes, senderPrivateKey);
+            var signatureBase64 = Convert.ToBase64String(signatureBytes);
 
 
             var sha256digest = new Sha256Digest();

@@ -34,8 +34,8 @@ namespace HackChain.Core.Extensions
         }
         public static string Sign(this Transaction transaction, ECPrivateKeyParameters privateKey)
         {
-            var hash = transaction.CalculateHash();
-            var signature = CryptoUtilities.SignDataDeterministicly(hash, privateKey);
+            var forSigning = transaction.SerializeForHashing();
+            var signature = CryptoUtilities.SignDataDeterministicly(forSigning, privateKey);
 
             return signature;
         }
@@ -44,8 +44,8 @@ namespace HackChain.Core.Extensions
         {
             var publicKey = CryptoUtilities.PublicKeyFromHex(transaction.Sender);
 
-            var hash = transaction.CalculateHash();
-            var isValid = CryptoUtilities.VerifySignature(publicKey, transaction.Signature, hash);
+            var forVerifying = transaction.SerializeForHashing();
+            var isValid = CryptoUtilities.VerifySignature(publicKey, transaction.Signature, forVerifying);
 
             return isValid;
         }
