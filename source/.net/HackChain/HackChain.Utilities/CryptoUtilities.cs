@@ -4,6 +4,7 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Math.EC;
 using Org.BouncyCastle.Math.EC.Multiplier;
@@ -143,10 +144,38 @@ namespace HackChain.Utilities
         //    return signature;
         //}
 
+        public static byte[] SignDataDeterministicly(byte[] data, ECPrivateKeyParameters privateKey)
+        {
+            //string messageToSign = "sample";
+            //var digest = new System.Security.Cryptography.SHA256Managed();
+            //byte[] messageHash = digest.ComputeHash(Encoding.UTF8.GetBytes(messageToSign));
+
+            //X9ECParameters x9Params = SecNamedCurves.GetByName("secp256r1"); ;
+            //ECDomainParameters ecParams = new ECDomainParameters(x9Params.Curve, x9Params.G, x9Params.N, x9Params.H);
+            //ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(new BigInteger(1, Hex.Decode("C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721")), ecParams);
+            //ECDsaSigner signer = new ECDsaSigner(new HMacDsaKCalculator(new Sha256Digest()));
+            var sha256digest = new Sha256Digest();
+            ISigner signer = new DsaDigestSigner(new ECDsaSigner(new HMacDsaKCalculator(sha256digest)), sha256digest);
+            signer.Init(true, privateKey);
+            signer.BlockUpdate(data, 0, data.Length);
+            var signature = signer.GenerateSignature();
+
+            return signature;
+        }
+
+        public static string SignDataDeterministicly(string data, ECPrivateKeyParameters privateKey)
+        {
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            byte[] signatureBytes = SignDataDeterministicly(dataBytes, privateKey);
+
+            return Convert.ToBase64String(signatureBytes);
+        }
+
         public static byte[] SignData(byte[] data, ECPrivateKeyParameters privateKey)
         {
 
             ISigner signer = SignerUtilities.GetSigner("SHA-256withECDSA");
+            
             signer.Init(true, privateKey);
             signer.BlockUpdate(data, 0, data.Length);
             byte[] signatureBytes = signer.GenerateSignature();

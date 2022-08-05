@@ -35,7 +35,7 @@ namespace HackChain.Core.Extensions
         public static string Sign(this Transaction transaction, ECPrivateKeyParameters privateKey)
         {
             var hash = transaction.CalculateHash();
-            var signature = CryptoUtilities.SignData(hash, privateKey);
+            var signature = CryptoUtilities.SignDataDeterministicly(hash, privateKey);
 
             return signature;
         }
