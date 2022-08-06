@@ -23,7 +23,7 @@ namespace HackChain.Node.Web.Controllers
 
         [Route("{index}")]
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<BlockDTO>>> GetByAddress(long index)
+        public async Task<ActionResult<ApiResponse<BlockDTO>>> GetByIndex(long index)
         {
             var block = await _nodeService.GetBlockByIndex(index);
             var result = _mapper.Map<BlockDTO>(block);

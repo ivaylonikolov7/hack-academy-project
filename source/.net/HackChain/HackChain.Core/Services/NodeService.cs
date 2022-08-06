@@ -9,6 +9,7 @@ namespace HackChain.Core.Services
 {
     public class NodeService: INodeService
     {
+        private static Dictionary<string, PeerNode> _peers = new Dictionary<string, PeerNode>();
         private static bool _isMining = false;
         private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
         private HackChainDbContext _db;
@@ -172,6 +173,62 @@ namespace HackChain.Core.Services
             };
 
             return status;
+        }
+
+        public Task Init()
+        {
+            
+        }
+
+        public Task<IEnumerable<PeerNode>> GetPeerNodes()
+        {
+            return Task.FromResult(_peers.Select(p => p.Value));
+        }
+
+        public void AddPeerNode(PeerNode peerNodeCandidate)
+        {
+            //try to connect to the node and get its peers?
+            TryConnectPeerNode(peerNodeCandidate);
+            var existingPeer = _peers[peerNodeCandidate.Id];
+            if (existingPeer.BaseUrl != peerNodeCandidate.BaseUrl)
+            {
+                //throw? can a node change its base url
+                //how to prevent nodes to spoof peers?
+                //how to enable nodes to claim their identity after some other node has taken their id?
+            }
+
+            var peersWithSameUrl = _peers
+                .Where(p => p.Value.BaseUrl == peerNodeCandidate.BaseUrl)
+                .Select(p => p)
+                .ToList();
+
+            if (peersWithSameUrl.Any())
+            {
+                //throw? it makes no sense 2 nodes with different Id to have the same url
+                //it is not possible to figth against multiple urls pointing to the same Node
+            }
+
+            _peers[peerNodeCandidate.Id] = peerNodeCandidate;
+        }
+
+        private void TryConnectPeerNode(PeerNode peerNodeCandidate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddBlock(Block block)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void PropagateTransaction(Transaction transaction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void PropagateBlock(Block block)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -30,5 +30,25 @@ namespace HackChain.Node.Web.Controllers
 
             return ApiResponse<NodeStatus>.Successful(nodeStatus);
         }
+
+        [Route("peers")]
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<IEnumerable<PeerNodeDTO>>>> GetPeerNodes()
+        {
+            var peerNodes = await _nodeService.GetPeerNodes();
+            var result = _mapper.Map<IEnumerable<PeerNodeDTO>>(peerNodes);
+
+            return ApiResponse<IEnumerable<PeerNodeDTO>>.Successful(result);
+        }
+
+        [Route("peers")]
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<bool>>> PostPeerNode(PeerNodeDTO peerNode)
+        {
+            var domainPeerNode = _mapper.Map<PeerNode>(peerNode);
+            _nodeService.AddPeerNode(domainPeerNode);
+
+            return ApiResponse<bool>.Successful(true);
+        }
     }
 }
