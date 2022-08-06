@@ -1,4 +1,5 @@
 ﻿using HackChain.Core.Infrastructure;
+using HackChain.Node.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;

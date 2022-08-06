@@ -1,4 +1,4 @@
-﻿namespace HackChain.Core.Infrastructure
+﻿namespace HackChain.Node.DTO
 {
     public enum HackChainErrorCode
     {

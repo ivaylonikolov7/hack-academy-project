@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
-using HackChain.Node.Web.DTO;
-using HackChain.Node.Web.Infrastructure;
+using HackChain.Node.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HackChain.Node.Web.Controllers

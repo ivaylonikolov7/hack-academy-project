@@ -1,5 +1,6 @@
 ﻿using HackChain.Core.Infrastructure;
 using HackChain.Core.Model;
+using HackChain.Node.DTO;
 using HackChain.Utilities;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Crypto.Parameters;

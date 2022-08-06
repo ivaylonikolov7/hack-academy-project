@@ -1,20 +1,16 @@
 ﻿using HackChain.Core.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HackChain.Node.DTO;
 
 namespace HackChain.Core.Interfaces
 {
     public interface INodeConnector
     {
-        Task<Block> GetBlockByIndex(long index);
-        Task<NodeStatus> GetNodeStatus();
-        Task<IEnumerable<PeerNode>> GetPeerNodes();
-        Task AddPeerNode(PeerNode peerNode);
-        Task AddBlock(Block block);
-        Task AddTransaction(Transaction transaction);
-        Task GetPendingTransactions()
+        Task<BlockDTO> GetBlockByIndex(long index);
+        Task<NodeStatusDTO> GetNodeStatus();
+        Task<IEnumerable<PeerNodeDTO>> GetPeerNodes();
+        Task<bool> AddPeerNode(PeerNodeDTO peerNode);
+        Task<bool> AddBlock(BlockDTO block);
+        Task<bool> AddTransaction(TransactionDTO transaction);
+        Task<IEnumerable<TransactionDTO>> GetPendingTransactions();
     }
 }

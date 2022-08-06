@@ -177,7 +177,7 @@ namespace HackChain.Core.Services
 
         public Task Init()
         {
-            
+            return Task.CompletedTask;
         }
 
         public Task<IEnumerable<PeerNode>> GetPeerNodes()

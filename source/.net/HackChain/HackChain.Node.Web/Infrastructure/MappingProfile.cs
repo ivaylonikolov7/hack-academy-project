@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using HackChain.Core.Model;
-using HackChain.Node.Web.DTO;
+using HackChain.Node.DTO;
 
 namespace HackChain.Node.Web.Infrastructure
 {

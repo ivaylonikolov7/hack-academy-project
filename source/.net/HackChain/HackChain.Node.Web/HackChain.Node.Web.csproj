@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HackChain.Core\HackChain.Core.csproj" />
+    <ProjectReference Include="..\HackChain.Node.DTO\HackChain.Node.DTO.csproj" />
     <ProjectReference Include="..\HackChain.Utilities\HackChain.Utilities.csproj" />
   </ItemGroup>
 

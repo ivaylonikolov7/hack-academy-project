@@ -1,4 +1,4 @@
-﻿namespace HackChain.Node.Web.DTO
+﻿namespace HackChain.Node.DTO
 {
     public class BlockDTO
     {

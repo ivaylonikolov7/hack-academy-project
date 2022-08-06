@@ -1,5 +1,6 @@
 ﻿using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
+using HackChain.Node.DTO;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,45 +19,52 @@ namespace HackChain.Core.Infrastructure
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri(baseUrl);
         }
-        public Task AddBlock(Block block)
+        public async Task<bool> AddBlock(BlockDTO block)
         {
-            var response = Post<bool>("", block);
+            var response = await Post<bool>("", block);
+
+            return response;
         }
 
-        public async Task AddPeerNode(PeerNode peerNode)
+        public async Task<bool> AddPeerNode(PeerNodeDTO peerNode)
         {
             var response = await Post<bool>("/api/node/peers", peerNode);
+            return response;
         }
 
-        public async Task AddTransaction(Transaction transaction)
+        public async Task<bool> AddTransaction(TransactionDTO transaction)
         {
             var response = await Post<bool>("/api/transactions/add", transaction);
+
+            return response;
         }
 
-        public async Task<Block> GetBlockByIndex(long index)
+        public async Task<BlockDTO> GetBlockByIndex(long index)
         {
-            var block = await Get<Block>("/api/block/index");
+            var block = await Get<BlockDTO>("/api/block/index");
 
             return block;
         }
 
-        public async Task<NodeStatus> GetNodeStatus()
+        public async Task<NodeStatusDTO> GetNodeStatus()
         {
-            var nodeStatus = await Get<NodeStatus>("/api/node/status");
+            var nodeStatus = await Get<NodeStatusDTO>("/api/node/status");
 
             return nodeStatus;
         }
 
-        public async Task<IEnumerable<PeerNode>> GetPeerNodes()
+        public async Task<IEnumerable<PeerNodeDTO>> GetPeerNodes()
         {
-            var nodes = await Get<IEnumerable<PeerNode>>("/api/node/peers");
+            var nodes = await Get<IEnumerable<PeerNodeDTO>>("/api/node/peers");
 
             return nodes;
         }
 
-        public Task GetPendingTransactions()
+        public async Task<IEnumerable<TransactionDTO>> GetPendingTransactions()
         {
-            ApiResponse<TransactionDTO>
+            var pendingTransactions = await Get<IEnumerable<TransactionDTO>>("/api/transactions/pending");
+
+            return pendingTransactions;
         }
 
         private async Task<T> Get<T>(string endpointUrl)
@@ -64,14 +72,7 @@ namespace HackChain.Core.Infrastructure
             try
             {
                 var response = await _httpClient.GetAsync(endpointUrl);
-                if (response.IsSuccessStatusCode)
-                {
-                    //log? throw?
-                }
-
-                string content = await response.Content.ReadAsStringAsync();
-
-                T result = JsonConvert.DeserializeObject<T>(content);
+                var result = await ProcessApiResponse<T>(response);
 
                 return result;
             }
@@ -88,14 +89,7 @@ namespace HackChain.Core.Infrastructure
                 var serializedPayload = JsonConvert.SerializeObject(payload);
                 StringContent requestContent = new StringContent(serializedPayload, Encoding.UTF8);
                 var response = await _httpClient.PostAsync(endpointUrl, requestContent);
-                if (response.IsSuccessStatusCode)
-                {
-                    //log? throw?
-                }
-
-                string content = await response.Content.ReadAsStringAsync();
-
-                T result = JsonConvert.DeserializeObject<T>(content);
+                var result = await ProcessApiResponse<T>(response);
 
                 return result;
             }
@@ -103,6 +97,30 @@ namespace HackChain.Core.Infrastructure
             {
                 throw ex;
             }
+        }
+
+        private async Task<T> ProcessApiResponse<T>(HttpResponseMessage responseMessage)
+        {
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                //log? throw?
+            }
+
+            string content = await responseMessage.Content.ReadAsStringAsync();
+
+            var response = JsonConvert.DeserializeObject<ApiResponse<T>>(content);
+
+            // check for null result
+            if (response == null)
+            {
+                // log errors and throw?
+            }
+            if (response.Success == false)
+            {
+                // log errors? throw?
+            }
+
+            return response.Data;
         }
     }
 }

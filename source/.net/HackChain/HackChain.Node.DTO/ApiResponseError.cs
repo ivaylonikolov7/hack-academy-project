@@ -1,8 +1,7 @@
-﻿using HackChain.Core.Infrastructure;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 
-namespace HackChain.Node.Web.Infrastructure
+namespace HackChain.Node.DTO
 {
     public class ApiResponseError
     {

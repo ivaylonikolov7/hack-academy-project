@@ -2,6 +2,7 @@
 using HackChain.Core.Infrastructure;
 using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
+using HackChain.Node.DTO;
 using HackChain.Utilities;
 using Org.BouncyCastle.Crypto.Parameters;
 

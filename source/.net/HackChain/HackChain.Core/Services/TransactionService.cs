@@ -3,6 +3,7 @@ using HackChain.Core.Extensions;
 using HackChain.Core.Infrastructure;
 using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
+using HackChain.Node.DTO;
 using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 

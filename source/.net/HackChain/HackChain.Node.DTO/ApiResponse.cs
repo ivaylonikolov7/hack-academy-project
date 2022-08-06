@@ -1,7 +1,6 @@
-﻿using HackChain.Core.Infrastructure;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace HackChain.Node.Web.Infrastructure
+namespace HackChain.Node.DTO
 {
     public class ApiResponse<T>
     {
