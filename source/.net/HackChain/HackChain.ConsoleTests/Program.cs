@@ -66,7 +66,7 @@ Public key (hex): '{publicKeyHex}'
             var transaction = new Transaction() { 
                 Sender = "04140188cbfa31e9364dcfe0b6204b4ff7913daf66da8cf59eaf4694ed5d3774e424b20a1a95a829976778ac280496dc4cdd1d1fdfab649cba799d084dcf0cc296",
                 Recipient = "044842ce6522e4442ccf446c9d28e7be0aa26b83934d60289e3c1f9eba49e44dd6134b7b22ff8a38e86e69683843e3f058f326001ff4fee56e94a1e9681cda4bda",
-                Nonce = 1,
+                Nonce = 2,
                 Value = 1000,
                 Fee = 5};
 
@@ -80,30 +80,9 @@ Public key (hex): '{publicKeyHex}'
             var hash = transaction.CalculateHash();
             transaction.Hash = hash;
 
-            bool hashMatch = hashManualHEX == hash;
-
-            byte[] hashBytes = Encoding.UTF8.GetBytes(hash);
-            byte[] signatureBytes = CryptoUtilities.SignDataDeterministicly(forHashingUTF8Bytes, senderPrivateKey);
-            var signatureBase64 = Convert.ToBase64String(signatureBytes);
-
-
-            var sha256digest = new Sha256Digest();
-            var ecdsaSigner = new ECDsaSigner1(new HMacDsaKCalculator(sha256digest));
-            ISigner signer = new DsaDigestSigner1(ecdsaSigner, sha256digest);
-            signer.Init(true, senderPrivateKey);
-            signer.BlockUpdate(hashBytes, 0, hashBytes.Length);
-
-
-            var signature = signer.GenerateSignature();
-
-
 
             var transactionSignature = transaction.Sign(senderPrivateKey);
             transaction.Signature = transactionSignature;
-
-            var isValid = CryptoUtilities.VerifySignature(publicKey, transactionSignature, hash);
-
-            Console.WriteLine("asfasdfsd f + " + isValid);
 
             string fullTransaction = transaction.Serialize();
 
@@ -123,12 +102,6 @@ Transaction hash bytes:
 
 Transaction hash:
 '{hash}'
-
-Transaction hash bytes using UTF8 for signing:
-'{BytesToString(hashBytes)}'
-
-Transaction signature bytes:
-'{BytesToString(signatureBytes)}'
 
 Transaction signature:
 '{transactionSignature}'

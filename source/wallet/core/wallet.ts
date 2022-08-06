@@ -52,7 +52,7 @@ class Wallet {
 
         const tx = new Transaction(this.selectedAccount,
             rawTx.recipient,
-            1, // accountInfo.nonce
+            (accountInfo?.nonce + 1) ?? 1,
             rawTx.value,
             rawTx.fee);
 
