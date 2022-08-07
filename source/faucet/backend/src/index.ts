@@ -1,7 +1,8 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { Address } from './models/address-schema'
+import { Address } from './models/address-schema';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ const mongoDB = 'mongodb://127.0.0.1/faucet';
 mongoose.connect(mongoDB);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+app.use(cors({ origin: true }));
 
 app.post('/send', async (req: Request, res: Response, next: NextFunction) => {
   const date = new Date(); 

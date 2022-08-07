@@ -6,11 +6,13 @@ function App() {
   const [address, setAddress] = useState('');
   const [hash, setHash] = useState('');
 
+  const [addressEntered, setAddressEntered] = useState(false);
+
   const send = () => {
     if (!isAddress) {
       return;
     }
-    axios.post(`${process.env.BACKEND_URL}/send`, {
+    axios.post(`/send`, {
       address: address,
     })
     .then(function (response) {
@@ -29,10 +31,25 @@ function App() {
     <div className="App">
       <h1>HACK ACKADEMY FAUCET</h1>
       <h2>Fast and reliable. 0.5 TestHCT HCT/day</h2>
-      <input type="text" id="address" placeholder='enter address' onChange={(event) => setAddress(event.target.value)}></input>
-      {!isAddress && <text id="error-address">Invalid address</text>}
-      <button id="send" onClick={send}>Send</button>
-      {hash && <p>Transaction URL: https://TODO_EXPLORER_URL/transaction/{hash}</p>}
+      <input
+        type="text"
+        id="address"
+        placeholder='enter address'
+        onChange={(event) => setAddress(event.target.value)}
+        onKeyUp={() => setAddressEntered(true)}
+        onPaste={() => setAddressEntered(true)}
+      />
+      {addressEntered && !isAddress && <p id="error-address">Invalid address</p>}
+      <button
+        id="send"
+        onClick={send}
+        disabled={!isAddress}>
+          Send
+      </button>
+      {hash && <div>
+        <span>Transaction URL: </span>
+        <a href="https://TODO_EXPLORER_URL/transaction/{hash}">https://TODO_EXPLORER_URL/transaction/{hash}</a>
+      </div>}
     </div>
   );
 }
