@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using HackChain.Node.DTO;
+using System.Text.Json.Serialization;
 
 namespace HackChain.Core.Model
 {
@@ -17,9 +18,9 @@ namespace HackChain.Core.Model
         public long PendingTransactionsCount { get; set; }
     }
 
-    public enum NodeStatusType
-    {
-        Synced,
-        Syncing
-    }
+    //public enum NodeStatusType
+    //{
+    //    Synced,
+    //    Syncing
+    //}
 }

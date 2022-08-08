@@ -11,6 +11,9 @@ namespace HackChain.Node.Web.Infrastructure
             CreateMap<Transaction, TransactionDTO>();
             CreateMap<TransactionDTO, Transaction>();
 
+            CreateMap<Transaction, TransactionWithBlockInfoDTO>()
+                .ForMember(dest => dest.BlockIndex, opt => opt.MapFrom(source => source.Block.Index));
+
             CreateMap<Account, AccountDTO>();
 
             CreateMap<Block, BlockDTO>();

@@ -88,12 +88,13 @@ namespace HackChain.Core.Services
             if (parsedAddress == null)
             {
                 throw new HackChainException($"Address='{address}' is not valid.",
-                    HackChainErrorCode.Transaction_Invalid_Address);
+                    HackChainErrorCode.Invalid_Address);
             }
             var transactions = await _db.Transactions
                 .Where(tr => tr.Sender == address || tr.Recipient == address)
                 .Where(tr => tr.BlockId != null)
                 .OrderBy(tr => tr.Block.Index)
+                .Include(tr => tr.Block)
                 .ToListAsync();
 
             return transactions;

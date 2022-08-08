@@ -52,16 +52,5 @@ namespace HackChain.Node.Web.Controllers
 
             return ApiResponse<IEnumerable<TransactionDTO>>.Successful(result);
         }
-
-        [Route("byaddress/{address}")]
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<TransactionDTO>>>> GetByAddress(string address)
-        {
-            var transactions = await _transactionService.GetTransactionByHash(address);
-            var result = _mapper.Map<IEnumerable<TransactionDTO>>(transactions);
-
-
-            return ApiResponse<IEnumerable<TransactionDTO>>.Successful(result);
-        }
     }
 }
