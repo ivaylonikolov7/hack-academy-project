@@ -6,6 +6,7 @@ namespace HackChain.Core.Interfaces
     {
         Task AddTransaction(Transaction transaction);
         Task<Transaction> GetTransactionByHash(string hash);
+        Task<IEnumerable<Transaction>> GetTransactionByAddress(string address);
         Task<IEnumerable<Transaction>> GetPendingTransactions();
     }
 }

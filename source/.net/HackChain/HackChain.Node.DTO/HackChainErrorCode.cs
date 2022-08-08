@@ -7,6 +7,7 @@
 
         Transaction_Invalid_Sender = 1000,
         Transaction_Invalid_Recipient,
+        Transaction_Invalid_Address,
         Transaction_Invalid_Value,
         Transaction_Invalid_Fee,
         Transaction_Invalid_Hash,

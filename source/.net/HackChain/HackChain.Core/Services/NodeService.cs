@@ -4,6 +4,8 @@ using HackChain.Core.Model;
 using Microsoft.EntityFrameworkCore;
 using HackChain.Core.Extensions;
 using HackChain.Utilities;
+using HackChain.Core.Infrastructure;
+using HackChain.Node.DTO;
 
 namespace HackChain.Core.Services
 {
@@ -11,6 +13,7 @@ namespace HackChain.Core.Services
     {
         private static Dictionary<string, PeerNode> _peers = new Dictionary<string, PeerNode>();
         private static bool _isMining = false;
+        private static NodeStatusType _nodeStatusType;
         private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
         private HackChainDbContext _db;
         private IAccountService _accountService;
@@ -175,9 +178,69 @@ namespace HackChain.Core.Services
             return status;
         }
 
-        public Task Init()
+        public async Task Init()
         {
-            return Task.CompletedTask;
+            _nodeStatusType = NodeStatusType.Syncing;
+            // connect to all known nodes and their peers
+            ConnectToPeerNodes();
+            // get pending transactions from all peer nodes
+            // get the longest chain - pick 1 node
+            // sync the missing blocks
+
+            _nodeStatusType = NodeStatusType.Synced;
+
+            return;
+        }
+
+        private async Task ConnectToPeerNodes()
+        {
+            //PeerNode thisNode = new PeerNode
+            //{
+            //    BaseUrl = _settings.BaseUrl,
+            //    Id = _settings.NodeId,
+
+            //};
+
+            //var thisNodeDTO = _mapper.Map<PeerNodeDTO>(thisNode);
+            //// start from known node URLs
+            //foreach (var url in _settings.KnownPeerNodesBaseUrls)
+            //{
+            //    INodeConnector connector = new NodeConnector(url);
+            //    var nodeStatus = await connector.GetNodeStatus();
+
+            //    var addPeerNodeResponse = await connector.AddPeerNode(thisNodeDTO);
+
+            //    var peerNode = new PeerNode
+            //    {
+            //        BaseUrl = nodeStatus.BaseUrl,
+            //        Id = nodeStatus.NodeId
+            //    };
+            //    AddPeerNode(peerNode);
+
+            //    var peers = await connector.GetPeerNodes();
+            //    foreach (var peerNode1 in peers)
+            //    {
+            //        var pn = _mapper.Map<PeerNode>(peerNode1);
+            //        AddPeerNode(pn);
+            //    }
+            //}
+
+            //PeerNode currentNode = _peers
+            //    .Where(pn => pn.Value.LastUpdatedOn.HasValue == false)
+            //    .Select(pn => pn.Value)
+            //    .FirstOrDefault();
+
+            //while(currentNode !=null)
+            //{
+            //    INodeConnector connector = new NodeConnector(currentNode.BaseUrl);
+            //    var addPeerNodeResponse = await connector.AddPeerNode(thisNodeDTO);
+            //    var peers = await connector.GetPeerNodes();
+            //    foreach (var peerNode in peers)
+            //    {
+            //        var pn = _mapper.Map<PeerNode>(peerNode);
+            //        AddPeerNode(pn);
+            //    }
+            //}
         }
 
         public Task<IEnumerable<PeerNode>> GetPeerNodes()
@@ -187,28 +250,34 @@ namespace HackChain.Core.Services
 
         public void AddPeerNode(PeerNode peerNodeCandidate)
         {
-            //try to connect to the node and get its peers?
-            TryConnectPeerNode(peerNodeCandidate);
-            var existingPeer = _peers[peerNodeCandidate.Id];
-            if (existingPeer.BaseUrl != peerNodeCandidate.BaseUrl)
+            if(_peers.ContainsKey(peerNodeCandidate.Id) == false)
             {
-                //throw? can a node change its base url
-                //how to prevent nodes to spoof peers?
-                //how to enable nodes to claim their identity after some other node has taken their id?
+                peerNodeCandidate.LastUpdatedOn = DateTime.UtcNow;
+                _peers[peerNodeCandidate.Id] = peerNodeCandidate;
             }
+            ////try to connect to the node and get its peers?
+            //TryConnectPeerNode(peerNodeCandidate);
+            //var existingPeer = _peers[peerNodeCandidate.Id];
+            //if (existingPeer.BaseUrl != peerNodeCandidate.BaseUrl)
+            //{
+            //    //throw? can a node change its base url
+            //    //how to prevent nodes to spoof peers?
+            //    //how to enable nodes to claim their identity after some other node has taken their id?
+            //}
 
-            var peersWithSameUrl = _peers
-                .Where(p => p.Value.BaseUrl == peerNodeCandidate.BaseUrl)
-                .Select(p => p)
-                .ToList();
+            //var peersWithSameUrl = _peers
+            //    .Where(p => p.Value.BaseUrl == peerNodeCandidate.BaseUrl)
+            //    .Select(p => p)
+            //    .ToList();
 
-            if (peersWithSameUrl.Any())
-            {
-                //throw? it makes no sense 2 nodes with different Id to have the same url
-                //it is not possible to figth against multiple urls pointing to the same Node
-            }
+            //if (peersWithSameUrl.Any())
+            //{
+            //    //throw? it makes no sense 2 nodes with different Id to have the same url
+            //    //it is not possible to figth against multiple urls pointing to the same Node
+            //}
 
-            _peers[peerNodeCandidate.Id] = peerNodeCandidate;
+            //peerNodeCandidate.LastUpdatedOn = DateTime.UtcNow;
+            //_peers[peerNodeCandidate.Id] = peerNodeCandidate;
         }
 
         private void TryConnectPeerNode(PeerNode peerNodeCandidate)

@@ -4,6 +4,7 @@ using HackChain.Core.Infrastructure;
 using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
 using HackChain.Node.DTO;
+using HackChain.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 
@@ -79,6 +80,23 @@ namespace HackChain.Core.Services
                 throw new HackChainException($"There is already pending Transaction[Hash='{existingTransactionFromSameAddress.Hash}'] from the same address='{transaction.Sender}' with the same Nonce='{transaction.Nonce}'.",
                     HackChainErrorCode.Transaction_Duplicate);
             }
+        }
+
+        public async Task<IEnumerable<Transaction>> GetTransactionByAddress(string address)
+        {
+            var parsedAddress = CryptoUtilities.PublicKeyFromHex(address);
+            if (parsedAddress == null)
+            {
+                throw new HackChainException($"Address='{address}' is not valid.",
+                    HackChainErrorCode.Transaction_Invalid_Address);
+            }
+            var transactions = await _db.Transactions
+                .Where(tr => tr.Sender == address || tr.Recipient == address)
+                .Where(tr => tr.BlockId != null)
+                .OrderBy(tr => tr.Block.Index)
+                .ToListAsync();
+
+            return transactions;
         }
     }
 }

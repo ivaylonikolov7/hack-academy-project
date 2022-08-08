@@ -11,5 +11,7 @@ namespace HackChain.Core.Model
         public string Id { get; set; }
         public string BaseUrl { get; set; }
         public int Rating { get; set; }
+        public DateTime? LastUpdatedOn { get; set; }
+
     }
 }
