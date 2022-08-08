@@ -19,7 +19,6 @@ class Wallet {
         this.accounts.set(address, account);
     
         if (selected) {
-            console.log('address', address);
             this.selectedAccount = address;
         }
     }
@@ -42,13 +41,13 @@ class Wallet {
 
         const accountInfo = await node.getAccountInfo(this.selectedAccount);
 
-        // if (!accountInfo) {
-        //     throw new Error('Cannot fetch account info');
-        // }
+        if (!accountInfo) {
+            throw new Error('Cannot fetch account info');
+        }
 
-        // if (accountInfo.balance < rawTx.value + rawTx.fee) {
-        //     throw new Error('Insufficient funds');
-        // }
+        if (accountInfo.balance < rawTx.value + rawTx.fee) {
+            throw new Error('Insufficient funds');
+        }
 
         const tx = new Transaction(this.selectedAccount,
             rawTx.recipient,
@@ -64,6 +63,20 @@ class Wallet {
         tx.setHash();
 
         return node.broadcastTransaction(tx.toString());
+    }
+
+    async getActiveAccountInfo() {
+        const node = this.nodes.get(this.selectedNode);
+        const accountInfo = await node.getAccountInfo(this.selectedAccount);
+
+        return accountInfo;
+    }
+
+    async getAccountTxs() {
+        const node = this.nodes.get(this.selectedNode);
+        const txs = await node.getAccountTxs(this.selectedAccount);
+
+        return txs;
     }
 }
 

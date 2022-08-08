@@ -13,7 +13,7 @@ export default {
     },
   },
   actions: {
-    init({ commit, rootGetters }, { accounts = [], nodes = [] } = {}) {
+    init({ commit, dispatch, rootGetters }, { accounts = [], nodes = [] } = {}) {
       console.log('tuk11');
       const mainnet = rootGetters["nodes/active"];
       if (!nodes.length) {
@@ -35,13 +35,6 @@ export default {
           return a;
         });
       }
-      // const account = new Account(
-      //   "83f919649688da47e81ea3802d49b902d0367b027ca708dbf7a078b844f196b5"
-      // );
-
-      // console.log(accounts);
-
-      // console.log("nodes", nodes);
 
       const wallet = new Wallet({
         nodes,
@@ -57,13 +50,27 @@ export default {
         wallet.addAccount(account, { selected: idx === 0 })
       );
 
-      console.log(wallet);
-
       commit("setInstance", wallet);
+
+      dispatch("accounts/fetchBalances", {}, { root: true });
+      dispatch("accounts/fetchTransactions", {}, { root: true });
+
+      setInterval(() => {
+        dispatch("accounts/fetchBalances", {}, { root: true });
+        dispatch("accounts/fetchTransactions", {}, { root: true });
+      }, 10000);
     },
 
     create({ dispatch, commit }) {
       const account = new Account();
+
+      commit("accounts/add", account, { root: true });
+
+      dispatch("init", { accounts: [account] });
+    },
+
+    import({ dispatch, commit }, privateKey) {
+      const account = new Account(privateKey);
 
       commit("accounts/add", account, { root: true });
 

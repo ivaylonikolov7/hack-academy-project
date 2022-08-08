@@ -39,26 +39,26 @@ export default class {
     }
 
     public validate() {
-        // if (!this.sender) {
-        //     throw new Error('Tx: valid sender is required');
-        // }
+        if (!this.sender) {
+            throw new Error('Tx: valid sender is required');
+        }
 
-        // if (!this.recipient) {
-        //     throw new Error('Tx: valid recipient is required');
-        // }
+        if (!this.recipient) {
+            throw new Error('Tx: valid recipient is required');
+        }
 
-        // if (!this.nonce && this.nonce !== 0) {
-        //     throw new Error('Tx: valid nonce is required');
-        // }
+        if (!this.nonce && this.nonce !== 0) {
+            throw new Error('Tx: valid nonce is required');
+        }
 
-        // if (!this.value) {
-        //     console.log(this.value);
-        //     throw new Error('Tx: valid value is required');
-        // }
+        if (!this.value) {
+            console.log(this.value);
+            throw new Error('Tx: valid value is required');
+        }
 
-        // if (!this.fee && this.fee !== 0) {
-        //     throw new Error('Tx: valid fee is required');
-        // }
+        if (!this.fee && this.fee !== 0) {
+            throw new Error('Tx: valid fee is required');
+        }
     }
 
     public toString() {

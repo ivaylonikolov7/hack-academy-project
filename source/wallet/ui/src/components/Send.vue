@@ -32,7 +32,7 @@ export default {
   },
   methods: {
     send() {
-      this.$emit("send", {
+      this.$store.state.wallet.instance.sendTransaction({
         recipient: this.recipient,
         value: Number(this.amount),
         fee: Number(this.fee),

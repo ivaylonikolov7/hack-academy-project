@@ -1,5 +1,3 @@
-import Transaction from './transaction';
-
 class Node {
     public id: string;
     public url: string;
@@ -23,6 +21,13 @@ class Node {
     async getAccountInfo(address: string) {
         const response = await fetch(`${this.url}/api/accounts/${address}`, { method: 'GET' });
 
+        const { data } = await response.json();
+
+        return data;
+    }
+
+    async getAccountTxs(address: string) {
+        const response = await fetch(`${this.url}/api/accounts/${address}/transactions`, { method: 'GET' });
 
         const { data } = await response.json();
 
