@@ -6,6 +6,7 @@ using HackChain.Core.Extensions;
 using HackChain.Utilities;
 using HackChain.Core.Infrastructure;
 using HackChain.Node.DTO;
+using AutoMapper;
 
 namespace HackChain.Core.Services
 {
@@ -16,17 +17,23 @@ namespace HackChain.Core.Services
         private static NodeStatusType _nodeStatusType;
         private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
         private HackChainDbContext _db;
+        private IMapper _mapper;
         private IAccountService _accountService;
         private HackChainSettings _settings;
+        private NodeConnector _nodeConnector;
 
         public NodeService(
             HackChainDbContext db,
             IAccountService accountService,
-            HackChainSettings settings)
+            IMapper mapper,
+            HackChainSettings settings
+            )
         {
             _db = db;
+            _mapper = mapper;
             _accountService = accountService;
             _settings = settings;
+            _nodeConnector = new NodeConnector();
         }
 
         public async Task<Block> GetBlockByIndex(long index)
@@ -182,10 +189,11 @@ namespace HackChain.Core.Services
         {
             _nodeStatusType = NodeStatusType.Syncing;
             // connect to all known nodes and their peers
-            ConnectToPeerNodes();
-            // get pending transactions from all peer nodes
+            await ConnectToPeerNodes();
+
             // get the longest chain - pick 1 node
             // sync the missing blocks
+            // get pending transactions from the node with the longest chain after syncing
 
             _nodeStatusType = NodeStatusType.Synced;
 
@@ -194,53 +202,59 @@ namespace HackChain.Core.Services
 
         private async Task ConnectToPeerNodes()
         {
-            //PeerNode thisNode = new PeerNode
-            //{
-            //    BaseUrl = _settings.BaseUrl,
-            //    Id = _settings.NodeId,
+            List<string> allnodesUrls = await TraverseAllNodes(_settings.KnownPeerNodesBaseUrls);
 
-            //};
+            foreach (var url in allnodesUrls)
+            {
+                await TryRegisterToPeerNode(url);
+                
+                await TryAddPeerNode(url);
+            }
+        }
 
-            //var thisNodeDTO = _mapper.Map<PeerNodeDTO>(thisNode);
-            //// start from known node URLs
-            //foreach (var url in _settings.KnownPeerNodesBaseUrls)
-            //{
-            //    INodeConnector connector = new NodeConnector(url);
-            //    var nodeStatus = await connector.GetNodeStatus();
+        public async Task<bool> TryRegisterToPeerNode(string peerNodeUrl)
+        {
+            _nodeConnector.SetBaserUrl(peerNodeUrl);
+            PeerNode thisNode = new PeerNode
+            {
+                BaseUrl = _settings.BaseUrl,
+                Id = _settings.NodeId
+            };
+            var thisNodeDTO = _mapper.Map<PeerNodeDTO>(thisNode);
+            var addPeerNodeResponse = await _nodeConnector.AddPeerNode(thisNodeDTO);
 
-            //    var addPeerNodeResponse = await connector.AddPeerNode(thisNodeDTO);
+            return addPeerNodeResponse;
+        }
 
-            //    var peerNode = new PeerNode
-            //    {
-            //        BaseUrl = nodeStatus.BaseUrl,
-            //        Id = nodeStatus.NodeId
-            //    };
-            //    AddPeerNode(peerNode);
+        private async Task<List<string>> TraverseAllNodes(IEnumerable<string> knownPeerNodesBaseUrls)
+        {
+            var nodeUrls = knownPeerNodesBaseUrls.ToDictionary(x => x, x => false);
 
-            //    var peers = await connector.GetPeerNodes();
-            //    foreach (var peerNode1 in peers)
-            //    {
-            //        var pn = _mapper.Map<PeerNode>(peerNode1);
-            //        AddPeerNode(pn);
-            //    }
-            //}
+            string url = nodeUrls
+                .Where(kv => kv.Value == false)
+                .Select(kv => kv.Key)
+                .FirstOrDefault();
 
-            //PeerNode currentNode = _peers
-            //    .Where(pn => pn.Value.LastUpdatedOn.HasValue == false)
-            //    .Select(pn => pn.Value)
-            //    .FirstOrDefault();
+            while(url != null)
+            {
+                _nodeConnector.SetBaserUrl(url);
+                var nodePeers = await _nodeConnector.GetPeerNodes();
+                foreach (var peer in nodePeers)
+                {
+                    if(nodeUrls.ContainsKey(peer.BaseUrl) == false)
+                    {
+                        // add the url for trversing
+                        nodeUrls[peer.BaseUrl] = false;
+                    }
+                }
 
-            //while(currentNode !=null)
-            //{
-            //    INodeConnector connector = new NodeConnector(currentNode.BaseUrl);
-            //    var addPeerNodeResponse = await connector.AddPeerNode(thisNodeDTO);
-            //    var peers = await connector.GetPeerNodes();
-            //    foreach (var peerNode in peers)
-            //    {
-            //        var pn = _mapper.Map<PeerNode>(peerNode);
-            //        AddPeerNode(pn);
-            //    }
-            //}
+                // marking url as traversed
+                nodeUrls[url] = true;
+            }
+
+            return nodeUrls
+                .Select(kv => kv.Key)
+                .ToList();
         }
 
         public Task<IEnumerable<PeerNode>> GetPeerNodes()
@@ -248,41 +262,44 @@ namespace HackChain.Core.Services
             return Task.FromResult(_peers.Select(p => p.Value));
         }
 
-        public void AddPeerNode(PeerNode peerNodeCandidate)
+        public async Task<bool> TryAddPeerNode(string peerNodeUrl)
         {
-            if(_peers.ContainsKey(peerNodeCandidate.Id) == false)
+            _nodeConnector.SetBaserUrl(peerNodeUrl);
+            var nodeStatus = await _nodeConnector.GetNodeStatus();
+
+            var peerNodeCandidate = new PeerNode
             {
-                peerNodeCandidate.LastUpdatedOn = DateTime.UtcNow;
+                BaseUrl = nodeStatus.BaseUrl,
+                Id = nodeStatus.NodeId,
+                LastUpdatedOn = DateTime.UtcNow,
+                Rating = 100
+            };
+
+            var existingPeer = _peers[peerNodeCandidate.Id];
+            if (existingPeer.BaseUrl != peerNodeCandidate.BaseUrl)
+            {
+                //throw? can a node change its base url
+                //how to prevent nodes to spoof peers?
+                //how to enable nodes to claim their identity after some other node has taken their id?
+            }
+
+            var peersWithSameUrl = _peers
+                .Where(p => p.Value.BaseUrl == peerNodeCandidate.BaseUrl)
+                .Select(p => p)
+                .ToList();
+
+            if (peersWithSameUrl.Any())
+            {
+                //throw? it makes no sense 2 nodes with different Id to have the same url
+                //it is not possible to figth against multiple urls pointing to the same Node
+            }
+
+            if (_peers.ContainsKey(peerNodeCandidate.Id) == false)
+            {
                 _peers[peerNodeCandidate.Id] = peerNodeCandidate;
             }
-            ////try to connect to the node and get its peers?
-            //TryConnectPeerNode(peerNodeCandidate);
-            //var existingPeer = _peers[peerNodeCandidate.Id];
-            //if (existingPeer.BaseUrl != peerNodeCandidate.BaseUrl)
-            //{
-            //    //throw? can a node change its base url
-            //    //how to prevent nodes to spoof peers?
-            //    //how to enable nodes to claim their identity after some other node has taken their id?
-            //}
 
-            //var peersWithSameUrl = _peers
-            //    .Where(p => p.Value.BaseUrl == peerNodeCandidate.BaseUrl)
-            //    .Select(p => p)
-            //    .ToList();
-
-            //if (peersWithSameUrl.Any())
-            //{
-            //    //throw? it makes no sense 2 nodes with different Id to have the same url
-            //    //it is not possible to figth against multiple urls pointing to the same Node
-            //}
-
-            //peerNodeCandidate.LastUpdatedOn = DateTime.UtcNow;
-            //_peers[peerNodeCandidate.Id] = peerNodeCandidate;
-        }
-
-        private void TryConnectPeerNode(PeerNode peerNodeCandidate)
-        {
-            throw new NotImplementedException();
+            return true;
         }
 
         public void AddBlock(Block block)

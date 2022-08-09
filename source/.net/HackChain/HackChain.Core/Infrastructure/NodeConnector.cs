@@ -1,12 +1,7 @@
 ﻿using HackChain.Core.Interfaces;
-using HackChain.Core.Model;
 using HackChain.Node.DTO;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace HackChain.Core.Infrastructure
 {
@@ -14,9 +9,13 @@ namespace HackChain.Core.Infrastructure
     {
         private readonly HttpClient _httpClient;
 
-        public NodeConnector(string baseUrl)
+        public NodeConnector()
         {
             _httpClient = new HttpClient();
+        }
+
+        public void SetBaserUrl(string baseUrl)
+        {
             _httpClient.BaseAddress = new Uri(baseUrl);
         }
         public async Task<bool> AddBlock(BlockDTO block)

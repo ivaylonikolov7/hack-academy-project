@@ -5,6 +5,7 @@ namespace HackChain.Core.Interfaces
 {
     public interface INodeConnector
     {
+        void SetBaserUrl(string baseUrl);
         Task<BlockDTO> GetBlockByIndex(long index);
         Task<NodeStatusDTO> GetNodeStatus();
         Task<IEnumerable<PeerNodeDTO>> GetPeerNodes();
