@@ -3,11 +3,6 @@ using HackChain.Core.Extensions;
 using HackChain.Core.Interfaces;
 using HackChain.Core.Model;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HackChain.Core.Services
 {
@@ -40,9 +35,18 @@ namespace HackChain.Core.Services
             recipientAccount.Balance += transaction.Value;
         }
 
-        public Task RevertTransactionData(Transaction transaction)
+        public async Task RevertTransactionData(Transaction transaction)
         {
-            throw new NotImplementedException();
+            if (transaction.IsCoinbase() == false)
+            {
+                long spentAmount = transaction.Value + transaction.Fee;
+                var senderAccount = await GetAccount(transaction.Sender);
+                senderAccount.Balance += spentAmount;
+                senderAccount.Nonce -= 1;
+            }
+
+            var recipientAccount = await GetAccount(transaction.Recipient);
+            recipientAccount.Balance -= transaction.Value;
         }
 
         private async Task<Account> GetAccount(string address)

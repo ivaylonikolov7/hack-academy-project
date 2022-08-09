@@ -13,10 +13,14 @@ namespace HackChain.Core.Services
     public class TransactionService : ITransactionService
     {
         private HackChainDbContext _db;
+        private IAccountService _accountService;
 
-        public TransactionService(HackChainDbContext db)
+        public TransactionService(
+            HackChainDbContext db,
+            IAccountService accountService)
         {
             _db = db;
+            _accountService = accountService;
         }
         public async Task AddTransaction(Transaction transaction)
         {
@@ -28,7 +32,7 @@ namespace HackChain.Core.Services
                     HackChainErrorCode.Transaction_Duplicate);
             }
 
-            ValidateBalanceAndNonce(transaction);
+            await ValidateBalanceAndNonce(transaction);
 
             _db.Transactions.Add(transaction);
 
@@ -52,9 +56,9 @@ namespace HackChain.Core.Services
             return transactions;
         }
 
-        private void ValidateBalanceAndNonce(Transaction transaction)
+        private async Task ValidateBalanceAndNonce(Transaction transaction)
         {
-            var account = _db.Accounts.FirstOrDefault(a => a.Address == transaction.Sender);
+            var account = await _accountService.GetAccountByAddress(transaction.Sender);
             long nextValidNonce = (account?.Nonce ?? 0) + 1;
             bool hasValidNonce = transaction.Nonce == nextValidNonce;
             // nonse should be precisely the next one

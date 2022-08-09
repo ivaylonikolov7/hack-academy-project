@@ -193,6 +193,7 @@ namespace HackChain.Core.Services
         public async Task Init()
         {
             _nodeStatusType = NodeStatusType.Syncing;
+
             // connect to all known nodes and their peers
             await ConnectToPeerNodes();
 
@@ -202,17 +203,14 @@ namespace HackChain.Core.Services
             //perform sync
             await TryAddBlock(_nodeWithLongestChain.LastBlockIndex, _nodeWithLongestChain.BaseUrl);
                 
-            // get pending transactions from the node with the longest chain after syncing
-            await RefreshPendingTransactions();
-
             _nodeStatusType = NodeStatusType.Synced;
 
             return;
         }
 
-        private async Task RefreshPendingTransactions()
+        private async Task RefreshPendingTransactions(string peerNodeUrl)
         {
-            _nodeConnector.SetBaserUrl(_nodeWithLongestChain.BaseUrl);
+            _nodeConnector.SetBaserUrl(peerNodeUrl);
             var pendingTransactions = await _nodeConnector.GetPendingTransactions();
 
             var domainPendingTransactions = _mapper.Map<IEnumerable<Transaction>>(pendingTransactions);
@@ -344,11 +342,29 @@ namespace HackChain.Core.Services
             if(lastLocalBlock != null
                 && lastLocalBlock.Index < remoteBlockIndex)
             {
+                // longer chain found
                 // find common block
-                var lastCommonLocalBlock = await GetLastCommonLocalBlock(lastLocalBlock);
-                // revert transactions in blocks till the last common block - in memory
+                var lastCommonLocalBlockIndex = await GetLastCommonLocalBlock(lastLocalBlock);
 
+                if (lastCommonLocalBlockIndex < lastLocalBlock.Index)
+                {
+                    // revert accounts present in transactions in blocks till the last common block
+                    //_accountService.RevertTransactionData()
+                    // delete transactions in blocks till the last common block?
+                    // we need to delete transactions, because the assumtion is that only valid transactions are in the mem pool - not the case when reverting mulitple blocks
+                }
+
+                long nextBlockIndexForProcessing = lastCommonLocalBlockIndex++;
+                while(nextBlockIndexForProcessing < remoteBlockIndex)
+                {
+                    // process blocks one by one
+                }
+
+                // get pending transactions from the node with the longest chain after syncing
+                await RefreshPendingTransactions(peerNodeUrl);
             }
+
+            
         }
 
         private async Task<long> GetLastCommonLocalBlock(Block currentLocalBlock)
@@ -357,6 +373,7 @@ namespace HackChain.Core.Services
             var remoteBlockDTO = await _nodeConnector.GetBlockByIndex(currentLocalBlock.Index);
             var remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
 
+            //TODO: validate missing blocks, with index larger than the current local block
             // perform simple block validation - difficulty and hash
             remoteBlock.Validate(_settings.Difficulty);
 
@@ -365,9 +382,11 @@ namespace HackChain.Core.Services
                 long newIndex = currentLocalBlock.Index--;
                 currentLocalBlock = await GetBlockByIndex(newIndex);
                 remoteBlockDTO = await _nodeConnector.GetBlockByIndex(newIndex);
+                remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
+                remoteBlock.Validate(_settings.Difficulty);
             }
 
-            return remoteBlockDTO.Index;
+            return currentLocalBlock.Index;
         }
 
         public void PropagateTransaction(Transaction transaction)
