@@ -18,6 +18,9 @@
         Transaction_Duplicate,
 
         Block_Invalid_Operation = 2000,
+        Block_Invalid_Difficulty,
+        Block_Invalid_Hash,
+
 
         Wallet_PrivateKey_Missing = 3000,
         Wallet_Invalid_Recipient

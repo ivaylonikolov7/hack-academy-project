@@ -10,7 +10,7 @@ namespace HackChain.Core.Interfaces
         Task<NodeStatus> GetNodeStatus();
         Task<IEnumerable<PeerNode>> GetPeerNodes();
         Task<bool> TryAddPeerNode(string peerNodeUrl);
-        Task TryAddBlock(Block remoteBlock, string peerNodeUrl);
+        Task TryAddBlock(long remoteBlockIndex, string peerNodeUrl);
         void PropagateTransaction(Transaction transaction);
         void PropagateBlock(Block block);
     }

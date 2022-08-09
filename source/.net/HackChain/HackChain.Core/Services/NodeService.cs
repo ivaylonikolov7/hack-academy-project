@@ -7,6 +7,7 @@ using HackChain.Utilities;
 using HackChain.Core.Infrastructure;
 using HackChain.Node.DTO;
 using AutoMapper;
+using HackChain.Core.Extensions;
 
 namespace HackChain.Core.Services
 {
@@ -338,31 +339,35 @@ namespace HackChain.Core.Services
         public async Task TryAddBlock(long remoteBlockIndex, string peerNodeUrl)
         {
             _nodeConnector.SetBaserUrl(peerNodeUrl);
-            var remoteBlock = await _nodeConnector.GetBlockByIndex(_nodeWithLongestChain.LastBlockIndex);
-            var domainBlock = _mapper.Map<Block>(remoteBlock);
             
             var lastLocalBlock = await GetLastBlock();
             if(lastLocalBlock != null
-                && lastLocalBlock.Index < remoteBlock.Index)
+                && lastLocalBlock.Index < remoteBlockIndex)
             {
                 // find common block
                 var lastCommonLocalBlock = await GetLastCommonLocalBlock(lastLocalBlock);
+                // revert transactions in blocks till the last common block - in memory
 
             }
         }
 
         private async Task<long> GetLastCommonLocalBlock(Block currentLocalBlock)
         {
-            var remoteBlock = await _nodeConnector.GetBlockByIndex(currentLocalBlock.Index);
+            //TODO: cache fetched remote blocks for further processing
+            var remoteBlockDTO = await _nodeConnector.GetBlockByIndex(currentLocalBlock.Index);
+            var remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
+
+            // perform simple block validation - difficulty and hash
+            remoteBlock.Validate(_settings.Difficulty);
 
             while(currentLocalBlock.CurrentBlockHash != remoteBlock.CurrentBlockHash)
             {
                 long newIndex = currentLocalBlock.Index--;
                 currentLocalBlock = await GetBlockByIndex(newIndex);
-                remoteBlock = await _nodeConnector.GetBlockByIndex(newIndex);
+                remoteBlockDTO = await _nodeConnector.GetBlockByIndex(newIndex);
             }
 
-            return currentLocalBlock.Index;
+            return remoteBlockDTO.Index;
         }
 
         public void PropagateTransaction(Transaction transaction)

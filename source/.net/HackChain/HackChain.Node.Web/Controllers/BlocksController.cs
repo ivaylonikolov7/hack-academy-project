@@ -32,12 +32,21 @@ namespace HackChain.Node.Web.Controllers
 
         [Route("mine")]
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<BlockDTO>>> Mine(long index)
+        public async Task<ActionResult<ApiResponse<BlockDTO>>> Mine()
         {
             var block = await _nodeService.MineBlock();
             var result = _mapper.Map<BlockDTO>(block);
 
             return ApiResponse<BlockDTO>.Successful(result);
+        }
+
+        [Route("add")]
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<bool>>> AddBlock(AddBlockDTO blockCandidate)
+        {
+            await _nodeService.TryAddBlock(blockCandidate.Index, "");
+
+            return ApiResponse<bool>.Successful(true);
         }
     }
 }

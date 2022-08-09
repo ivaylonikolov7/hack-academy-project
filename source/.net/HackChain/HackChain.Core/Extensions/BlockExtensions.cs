@@ -77,11 +77,27 @@ namespace HackChain.Core.Extensions
 
         }
 
-        public static void Validate(this Block block)
+        public static void Validate(this Block block, int requiredDifficulty)
         {
-            // 
+            if (block.Difficulty < requiredDifficulty)
+            {
+                throw new HackChainException($"Provided difficulty('{block.Difficulty}') for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the required difficulty('{requiredDifficulty}').",
+                    HackChainErrorCode.Block_Invalid_Difficulty);
+            }
 
-            
+            string leadingZeroes = new string('0', requiredDifficulty);
+            if(block.CurrentBlockHash.StartsWith(leadingZeroes) != false)
+            {
+                throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the required difficulty('{leadingZeroes}').",
+                    HackChainErrorCode.Block_Invalid_Hash);
+            }
+
+            string blockHash = CryptoUtilities.CalculateSHA256Hex(block.SerializeForHashing());
+            if (blockHash != block.CurrentBlockHash)
+            {
+                throw new HackChainException($"Provided hash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the calculated hash('{blockHash}').",
+                    HackChainErrorCode.Block_Invalid_Hash);
+            }
         }
     }
 }
