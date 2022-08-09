@@ -183,7 +183,7 @@ namespace HackChain.Core.Services
                 ProcessedTransactionsCount = await _db.Transactions.CountAsync(t => t.BlockId != null),
                 PendingTransactionsCount = await _db.Transactions.CountAsync(t => t.BlockId == null),
                 IsMining = _isMining,
-                Status = NodeStatusType.Synced
+                Status = _nodeStatusType
             };
 
             return status;
@@ -197,16 +197,12 @@ namespace HackChain.Core.Services
 
             // get the longest chain - pick 1 node
             // sync the missing blocks
-            var lastBlock = await GetLastBlock();
-
-            if (lastBlock == null
-                || lastBlock.Index < _nodeWithLongestChain.LastBlockIndex)
-            {
-                //perform sync
-                //SyncBlock
-                // get pending transactions from the node with the longest chain after syncing
-                await RefreshPendingTransactions();
-            }
+            
+            //perform sync
+            await TryAddBlock(_nodeWithLongestChain.LastBlockIndex, _nodeWithLongestChain.BaseUrl);
+                
+            // get pending transactions from the node with the longest chain after syncing
+            await RefreshPendingTransactions();
 
             _nodeStatusType = NodeStatusType.Synced;
 
@@ -339,9 +335,34 @@ namespace HackChain.Core.Services
             return true;
         }
 
-        public void AddBlock(Block block)
+        public async Task TryAddBlock(long remoteBlockIndex, string peerNodeUrl)
         {
-            throw new NotImplementedException();
+            _nodeConnector.SetBaserUrl(peerNodeUrl);
+            var remoteBlock = await _nodeConnector.GetBlockByIndex(_nodeWithLongestChain.LastBlockIndex);
+            var domainBlock = _mapper.Map<Block>(remoteBlock);
+            
+            var lastLocalBlock = await GetLastBlock();
+            if(lastLocalBlock != null
+                && lastLocalBlock.Index < remoteBlock.Index)
+            {
+                // find common block
+                var lastCommonLocalBlock = await GetLastCommonLocalBlock(lastLocalBlock);
+
+            }
+        }
+
+        private async Task<long> GetLastCommonLocalBlock(Block currentLocalBlock)
+        {
+            var remoteBlock = await _nodeConnector.GetBlockByIndex(currentLocalBlock.Index);
+
+            while(currentLocalBlock.CurrentBlockHash != remoteBlock.CurrentBlockHash)
+            {
+                long newIndex = currentLocalBlock.Index--;
+                currentLocalBlock = await GetBlockByIndex(newIndex);
+                remoteBlock = await _nodeConnector.GetBlockByIndex(newIndex);
+            }
+
+            return currentLocalBlock.Index;
         }
 
         public void PropagateTransaction(Transaction transaction)
