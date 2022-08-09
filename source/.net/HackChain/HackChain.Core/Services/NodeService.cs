@@ -19,12 +19,15 @@ namespace HackChain.Core.Services
         private HackChainDbContext _db;
         private IMapper _mapper;
         private IAccountService _accountService;
+        private ITransactionService _transactionService;
         private HackChainSettings _settings;
         private NodeConnector _nodeConnector;
+        private NodeStatusDTO _nodeWithLongestChain;
 
         public NodeService(
             HackChainDbContext db,
             IAccountService accountService,
+            ITransactionService transactionService,
             IMapper mapper,
             HackChainSettings settings
             )
@@ -32,6 +35,7 @@ namespace HackChain.Core.Services
             _db = db;
             _mapper = mapper;
             _accountService = accountService;
+            _transactionService = transactionService;
             _settings = settings;
             _nodeConnector = new NodeConnector();
         }
@@ -193,11 +197,38 @@ namespace HackChain.Core.Services
 
             // get the longest chain - pick 1 node
             // sync the missing blocks
-            // get pending transactions from the node with the longest chain after syncing
+            var lastBlock = await GetLastBlock();
+
+            if (lastBlock == null
+                || lastBlock.Index < _nodeWithLongestChain.LastBlockIndex)
+            {
+                //perform sync
+                //SyncBlock
+                // get pending transactions from the node with the longest chain after syncing
+                await RefreshPendingTransactions();
+            }
 
             _nodeStatusType = NodeStatusType.Synced;
 
             return;
+        }
+
+        private async Task RefreshPendingTransactions()
+        {
+            _nodeConnector.SetBaserUrl(_nodeWithLongestChain.BaseUrl);
+            var pendingTransactions = await _nodeConnector.GetPendingTransactions();
+
+            var domainPendingTransactions = _mapper.Map<IEnumerable<Transaction>>(pendingTransactions);
+            foreach (var tr in domainPendingTransactions)
+            {
+                try
+                {
+                    await _transactionService.AddTransaction(tr);
+                }
+                catch (Exception ex)
+                {
+                }
+            }
         }
 
         private async Task ConnectToPeerNodes()
@@ -266,6 +297,12 @@ namespace HackChain.Core.Services
         {
             _nodeConnector.SetBaserUrl(peerNodeUrl);
             var nodeStatus = await _nodeConnector.GetNodeStatus();
+
+            if(_nodeWithLongestChain == null
+                || _nodeWithLongestChain.LastBlockIndex < nodeStatus.LastBlockIndex)
+            {
+                _nodeWithLongestChain = nodeStatus;
+            }
 
             var peerNodeCandidate = new PeerNode
             {
