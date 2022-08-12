@@ -2,7 +2,7 @@
 {
     public class AddBlockDTO
     {
-        public long Index { get; set; }
+        public long BlockIndex { get; set; }
         public string PeerNodeUrl { get; set; }
     }
 }

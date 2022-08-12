@@ -44,7 +44,7 @@ namespace HackChain.Node.Web.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<bool>>> AddBlock(AddBlockDTO blockCandidate)
         {
-            await _nodeService.TryAddBlock(blockCandidate.Index, "");
+            await _nodeService.TryAddBlock(blockCandidate.BlockIndex, "");
 
             return ApiResponse<bool>.Successful(true);
         }

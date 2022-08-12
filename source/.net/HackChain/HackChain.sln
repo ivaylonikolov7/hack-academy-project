@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HackChain.Core", "HackChain
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HackChain.Node.Web", "HackChain.Node.Web\HackChain.Node.Web.csproj", "{77651119-379A-481C-96BC-C4355A882AEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HackChain.Node.DTO", "HackChain.Node.DTO\HackChain.Node.DTO.csproj", "{D9773790-38BD-447D-A78E-494C9C1FC0E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HackChain.Node.DTO", "HackChain.Node.DTO\HackChain.Node.DTO.csproj", "{D9773790-38BD-447D-A78E-494C9C1FC0E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

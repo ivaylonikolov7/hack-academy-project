@@ -49,7 +49,7 @@ namespace HackChain.Node.Web
             ConfigureServices(builder.Services, builder.Configuration);
 
             var app = builder.Build();
-           
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -82,8 +82,17 @@ namespace HackChain.Node.Web
             {
                 options.MapControllers();
             });
+            Init(app).Wait();
 
-            app.Run();
+            app.Run();            
+        }
+        static async Task Init(WebApplication app) //can be placed at the very bottom under app.Run()
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var nodeService = scope.ServiceProvider.GetRequiredService<INodeService>();
+                await nodeService.Init();
+            }
         }
     }
 }

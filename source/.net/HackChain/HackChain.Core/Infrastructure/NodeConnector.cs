@@ -9,15 +9,12 @@ namespace HackChain.Core.Infrastructure
     {
         private readonly HttpClient _httpClient;
 
-        public NodeConnector()
+        public NodeConnector(string baseUrl)
         {
             _httpClient = new HttpClient();
-        }
-
-        public void SetBaserUrl(string baseUrl)
-        {
             _httpClient.BaseAddress = new Uri(baseUrl);
         }
+
         public async Task<bool> AddBlock(BlockDTO block)
         {
             var response = await Post<bool>("", block);

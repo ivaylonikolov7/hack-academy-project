@@ -7,12 +7,12 @@ using HackChain.Utilities;
 using HackChain.Core.Infrastructure;
 using HackChain.Node.DTO;
 using AutoMapper;
-using HackChain.Core.Extensions;
 
 namespace HackChain.Core.Services
 {
     public class NodeService: INodeService
     {
+        private static Dictionary<string, INodeConnector> _nodeConnectorsByUrl = new Dictionary<string, INodeConnector>();
         private static Dictionary<string, PeerNode> _peers = new Dictionary<string, PeerNode>();
         private static bool _isMining = false;
         private static NodeStatusType _nodeStatusType;
@@ -22,7 +22,6 @@ namespace HackChain.Core.Services
         private IAccountService _accountService;
         private ITransactionService _transactionService;
         private HackChainSettings _settings;
-        private NodeConnector _nodeConnector;
         private NodeStatusDTO _nodeWithLongestChain;
 
         public NodeService(
@@ -38,7 +37,6 @@ namespace HackChain.Core.Services
             _accountService = accountService;
             _transactionService = transactionService;
             _settings = settings;
-            _nodeConnector = new NodeConnector();
         }
 
         public async Task<Block> GetBlockByIndex(long index)
@@ -110,17 +108,6 @@ namespace HackChain.Core.Services
                 .OrderByDescending(b => b.Index)
                 .FirstOrDefaultAsync();
 
-            if(lastBlock == null)
-            {
-                var genesisBlock = GenerateGenesisBlock();
-                _db.Blocks.Add(genesisBlock);
-                await _db.SaveChangesAsync();
-                await UpdateAccounts(genesisBlock);
-                await _db.SaveChangesAsync();
-
-                lastBlock = genesisBlock;
-            }
-
             return lastBlock;
         }
 
@@ -129,16 +116,24 @@ namespace HackChain.Core.Services
             var genesisBlock = new Block
             {
                 Index = 1,
-                Difficulty = _settings.Difficulty,
+                Difficulty =5,
                 PreviousBlockHash = "none",
-                Timestamp = DateTime.UtcNow.ToUnixTime()
+                Timestamp = 1660293963,
+                Nonce = 476843,
+                CurrentBlockHash =  "00000f246a37ca30fa35b4e2bf62439c1b88f8d609a1a3244c8332c69614dd87",
+                Data = new List<Transaction> { 
+                    new Transaction { 
+                        Sender = "",
+                        Recipient = "04fbff67f613b7854c63e5b06eee5e880fd2ff618558e97a1cce73778579a94050c0381b973f34c192cba1662459e00902c2fbd5efd358844f964a94c39f69b91b",
+                        Nonce = 1,
+                        Data = null,
+                        Value = 100,
+                        Fee = 0,
+                        Hash = "8dacfd6cf7021fea26d1e3c482db3219ab03e78124ef96e31d32fc7cdded6172",
+                        Signature = "Coinbase"
+                    }
+                }
             };
-
-            var transactions = new List<Transaction>();
-            AddCoinbaseTransaction(transactions, genesisBlock.Index);
-            genesisBlock.AddTransactions(transactions);
-
-            CalculateBlockHash(genesisBlock);
 
             return genesisBlock;
         }
@@ -192,6 +187,7 @@ namespace HackChain.Core.Services
 
         public async Task Init()
         {
+            await TryAddGenesisBlock();
             _nodeStatusType = NodeStatusType.Syncing;
 
             // connect to all known nodes and their peers
@@ -208,10 +204,24 @@ namespace HackChain.Core.Services
             return;
         }
 
+        private async Task TryAddGenesisBlock()
+        {
+            var lastBlock = await GetLastBlock();
+            if (lastBlock == null)
+            {
+                var genesisBlock = GenerateGenesisBlock();
+                _db.Blocks.Add(genesisBlock);
+                await _db.SaveChangesAsync();
+                await UpdateAccounts(genesisBlock);
+                await _db.SaveChangesAsync();
+            }
+        }
+
         private async Task RefreshPendingTransactions(string peerNodeUrl)
         {
-            _nodeConnector.SetBaserUrl(peerNodeUrl);
-            var pendingTransactions = await _nodeConnector.GetPendingTransactions();
+            var nodeConnector = GetNodeConnector(peerNodeUrl);
+            
+            var pendingTransactions = await nodeConnector.GetPendingTransactions();
 
             var domainPendingTransactions = _mapper.Map<IEnumerable<Transaction>>(pendingTransactions);
             foreach (var tr in domainPendingTransactions)
@@ -224,6 +234,16 @@ namespace HackChain.Core.Services
                 {
                 }
             }
+        }
+
+        private INodeConnector GetNodeConnector(string nodeUrl)
+        {
+            if(_nodeConnectorsByUrl.ContainsKey(nodeUrl) == false)
+            {
+                _nodeConnectorsByUrl[nodeUrl] = new NodeConnector(nodeUrl);
+            }
+
+            return _nodeConnectorsByUrl[nodeUrl];
         }
 
         private async Task ConnectToPeerNodes()
@@ -240,14 +260,15 @@ namespace HackChain.Core.Services
 
         public async Task<bool> TryRegisterToPeerNode(string peerNodeUrl)
         {
-            _nodeConnector.SetBaserUrl(peerNodeUrl);
+            var nodeConnector = GetNodeConnector(peerNodeUrl);
+
             PeerNode thisNode = new PeerNode
             {
                 BaseUrl = _settings.BaseUrl,
                 Id = _settings.NodeId
             };
             var thisNodeDTO = _mapper.Map<PeerNodeDTO>(thisNode);
-            var addPeerNodeResponse = await _nodeConnector.AddPeerNode(thisNodeDTO);
+            var addPeerNodeResponse = await nodeConnector.AddPeerNode(thisNodeDTO);
 
             return addPeerNodeResponse;
         }
@@ -256,15 +277,16 @@ namespace HackChain.Core.Services
         {
             var nodeUrls = knownPeerNodesBaseUrls.ToDictionary(x => x, x => false);
 
-            string url = nodeUrls
+            string? url = nodeUrls
                 .Where(kv => kv.Value == false)
                 .Select(kv => kv.Key)
                 .FirstOrDefault();
 
             while(url != null)
             {
-                _nodeConnector.SetBaserUrl(url);
-                var nodePeers = await _nodeConnector.GetPeerNodes();
+                var nodeConnector = GetNodeConnector(url);
+
+                var nodePeers = await nodeConnector.GetPeerNodes();
                 foreach (var peer in nodePeers)
                 {
                     if(nodeUrls.ContainsKey(peer.BaseUrl) == false)
@@ -276,6 +298,11 @@ namespace HackChain.Core.Services
 
                 // marking url as traversed
                 nodeUrls[url] = true;
+                // fetch next non traversed url
+                url = nodeUrls
+                    .Where(kv => kv.Value == false)
+                    .Select(kv => kv.Key)
+                    .FirstOrDefault();
             }
 
             return nodeUrls
@@ -290,8 +317,9 @@ namespace HackChain.Core.Services
 
         public async Task<bool> TryAddPeerNode(string peerNodeUrl)
         {
-            _nodeConnector.SetBaserUrl(peerNodeUrl);
-            var nodeStatus = await _nodeConnector.GetNodeStatus();
+            var nodeConnector = GetNodeConnector(peerNodeUrl);
+
+            var nodeStatus = await nodeConnector.GetNodeStatus();
 
             if(_nodeWithLongestChain == null
                 || _nodeWithLongestChain.LastBlockIndex < nodeStatus.LastBlockIndex)
@@ -336,15 +364,15 @@ namespace HackChain.Core.Services
 
         public async Task TryAddBlock(long remoteBlockIndex, string peerNodeUrl)
         {
-            _nodeConnector.SetBaserUrl(peerNodeUrl);
-            
+            var nodeConnector = GetNodeConnector(peerNodeUrl);
+
             var lastLocalBlock = await GetLastBlock();
             if(lastLocalBlock != null
                 && lastLocalBlock.Index < remoteBlockIndex)
             {
                 // longer chain found
                 // find common block
-                var lastCommonLocalBlockIndex = await GetLastCommonLocalBlock(lastLocalBlock);
+                var lastCommonLocalBlockIndex = await GetLastCommonLocalBlock(lastLocalBlock, nodeConnector);
 
                 if (lastCommonLocalBlockIndex < lastLocalBlock.Index)
                 {
@@ -367,10 +395,10 @@ namespace HackChain.Core.Services
             
         }
 
-        private async Task<long> GetLastCommonLocalBlock(Block currentLocalBlock)
+        private async Task<long> GetLastCommonLocalBlock(Block currentLocalBlock, INodeConnector nodeConnector)
         {
             //TODO: cache fetched remote blocks for further processing
-            var remoteBlockDTO = await _nodeConnector.GetBlockByIndex(currentLocalBlock.Index);
+            var remoteBlockDTO = await nodeConnector.GetBlockByIndex(currentLocalBlock.Index);
             var remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
 
             //TODO: validate missing blocks, with index larger than the current local block
@@ -381,7 +409,7 @@ namespace HackChain.Core.Services
             {
                 long newIndex = currentLocalBlock.Index--;
                 currentLocalBlock = await GetBlockByIndex(newIndex);
-                remoteBlockDTO = await _nodeConnector.GetBlockByIndex(newIndex);
+                remoteBlockDTO = await nodeConnector.GetBlockByIndex(newIndex);
                 remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
                 remoteBlock.Validate(_settings.Difficulty);
             }
