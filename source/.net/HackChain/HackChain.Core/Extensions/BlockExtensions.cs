@@ -86,7 +86,7 @@ namespace HackChain.Core.Extensions
             }
 
             string leadingZeroes = new string('0', requiredDifficulty);
-            if(block.CurrentBlockHash.StartsWith(leadingZeroes) != false)
+            if(block.CurrentBlockHash.StartsWith(leadingZeroes) == false)
             {
                 throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the required difficulty('{leadingZeroes}').",
                     HackChainErrorCode.Block_Invalid_Hash);

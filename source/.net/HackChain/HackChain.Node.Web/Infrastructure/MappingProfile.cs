@@ -17,6 +17,7 @@ namespace HackChain.Node.Web.Infrastructure
             CreateMap<Account, AccountDTO>();
 
             CreateMap<Block, BlockDTO>();
+            CreateMap<BlockDTO, Block>();
 
             CreateMap<PeerNode, PeerNodeDTO>();
             CreateMap<PeerNodeDTO, PeerNode>();

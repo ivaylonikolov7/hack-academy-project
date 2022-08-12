@@ -1,6 +1,7 @@
 ﻿using HackChain.Core.Interfaces;
 using HackChain.Node.DTO;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace HackChain.Core.Infrastructure
@@ -37,7 +38,7 @@ namespace HackChain.Core.Infrastructure
 
         public async Task<BlockDTO> GetBlockByIndex(long index)
         {
-            var block = await Get<BlockDTO>("/api/block/index");
+            var block = await Get<BlockDTO>($"/api/blocks/{index}");
 
             return block;
         }
@@ -84,6 +85,7 @@ namespace HackChain.Core.Infrastructure
             {
                 var serializedPayload = JsonConvert.SerializeObject(payload);
                 StringContent requestContent = new StringContent(serializedPayload, Encoding.UTF8);
+                requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 var response = await _httpClient.PostAsync(endpointUrl, requestContent);
                 var result = await ProcessApiResponse<T>(response);
 
@@ -97,9 +99,9 @@ namespace HackChain.Core.Infrastructure
 
         private async Task<T> ProcessApiResponse<T>(HttpResponseMessage responseMessage)
         {
-            if (responseMessage.IsSuccessStatusCode)
+            if (responseMessage.IsSuccessStatusCode == false)
             {
-                //log? throw?
+                return default;
             }
 
             string content = await responseMessage.Content.ReadAsStringAsync();

@@ -44,9 +44,9 @@ namespace HackChain.Node.Web.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<bool>>> PostPeerNode(PeerNodeDTO peerNode)
         {
-            var response = await _nodeService.TryAddPeerNode(peerNode.BaseUrl);
+            var response = _nodeService.TryAddPeerNode(peerNode.BaseUrl);
 
-            return ApiResponse<bool>.Successful(response);
+            return ApiResponse<bool>.Successful(true);
         }
     }
 }

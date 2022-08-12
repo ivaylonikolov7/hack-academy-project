@@ -119,7 +119,7 @@ namespace HackChain.Core.Services
                 Difficulty =5,
                 PreviousBlockHash = "none",
                 Timestamp = 1660293963,
-                Nonce = 476843,
+                Nonce = 476842,
                 CurrentBlockHash =  "00000f246a37ca30fa35b4e2bf62439c1b88f8d609a1a3244c8332c69614dd87",
                 Data = new List<Transaction> { 
                     new Transaction { 
@@ -275,39 +275,46 @@ namespace HackChain.Core.Services
 
         private async Task<List<string>> TraverseAllNodes(IEnumerable<string> knownPeerNodesBaseUrls)
         {
-            var nodeUrls = knownPeerNodesBaseUrls.ToDictionary(x => x, x => false);
+            var result = new List<string>();
 
-            string? url = nodeUrls
-                .Where(kv => kv.Value == false)
-                .Select(kv => kv.Key)
-                .FirstOrDefault();
-
-            while(url != null)
+            if (knownPeerNodesBaseUrls != null && knownPeerNodesBaseUrls.Any())
             {
-                var nodeConnector = GetNodeConnector(url);
+                var nodeUrls = knownPeerNodesBaseUrls.ToDictionary(x => x, x => false);
 
-                var nodePeers = await nodeConnector.GetPeerNodes();
-                foreach (var peer in nodePeers)
-                {
-                    if(nodeUrls.ContainsKey(peer.BaseUrl) == false)
-                    {
-                        // add the url for trversing
-                        nodeUrls[peer.BaseUrl] = false;
-                    }
-                }
-
-                // marking url as traversed
-                nodeUrls[url] = true;
-                // fetch next non traversed url
-                url = nodeUrls
+                string? url = nodeUrls
                     .Where(kv => kv.Value == false)
                     .Select(kv => kv.Key)
                     .FirstOrDefault();
-            }
 
-            return nodeUrls
+                while (url != null)
+                {
+                    var nodeConnector = GetNodeConnector(url);
+
+                    var nodePeers = await nodeConnector.GetPeerNodes();
+                    foreach (var peer in nodePeers)
+                    {
+                        if (peer.Id != _settings.NodeId && nodeUrls.ContainsKey(peer.BaseUrl) == false)
+                        {
+                            // add the url for trversing
+                            nodeUrls[peer.BaseUrl] = false;
+                        }
+                    }
+
+                    // marking url as traversed
+                    nodeUrls[url] = true;
+                    // fetch next non traversed url
+                    url = nodeUrls
+                        .Where(kv => kv.Value == false)
+                        .Select(kv => kv.Key)
+                        .FirstOrDefault();
+                }
+
+                result = nodeUrls
                 .Select(kv => kv.Key)
                 .ToList();
+            }
+
+            return result;
         }
 
         public Task<IEnumerable<PeerNode>> GetPeerNodes()
@@ -335,12 +342,14 @@ namespace HackChain.Core.Services
                 Rating = 100
             };
 
-            var existingPeer = _peers[peerNodeCandidate.Id];
-            if (existingPeer.BaseUrl != peerNodeCandidate.BaseUrl)
+            if (_peers.TryGetValue(peerNodeCandidate.Id, out var existingPeer))
             {
-                //throw? can a node change its base url
-                //how to prevent nodes to spoof peers?
-                //how to enable nodes to claim their identity after some other node has taken their id?
+                if (existingPeer.BaseUrl != peerNodeCandidate.BaseUrl)
+                {
+                    //throw? can a node change its base url
+                    //how to prevent nodes to spoof peers?
+                    //how to enable nodes to claim their identity after some other node has taken their id?
+                }
             }
 
             var peersWithSameUrl = _peers

@@ -90,8 +90,12 @@ namespace HackChain.Node.Web
         {
             using (var scope = app.Services.CreateScope())
             {
+                var setting = scope.ServiceProvider.GetRequiredService<HackChainSettings>();
                 var nodeService = scope.ServiceProvider.GetRequiredService<INodeService>();
-                await nodeService.Init();
+                if (setting.InitOnStartup)
+                {
+                    await nodeService.Init();
+                }
             }
         }
     }
