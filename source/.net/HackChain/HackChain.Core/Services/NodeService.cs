@@ -18,8 +18,8 @@ namespace HackChain.Core.Services
         private static NodeStatusType _nodeStatusType;
         private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
 
-        private List<Block> _remoteCandidateChain = new List<Block>();
-        private List<Block> _localChainForUpdating = new List<Block>();
+        private List<Block> _remoteCandidateChain;
+        private List<Block> _localChainForUpdating;
 
         private HackChainDbContext _db;
         private IMapper _mapper;
@@ -409,6 +409,9 @@ namespace HackChain.Core.Services
 
         private async Task FindLastCommonLocalBlock(Block currentLocalBlock, long remoteBlockIndex, INodeConnector nodeConnector)
         {
+            _remoteCandidateChain = new List<Block>();
+            _localChainForUpdating = new List<Block>();
+
             Block remoteBlock = null;
             Block previousRemoteBlock = null;
             BlockDTO remoteBlockDTO = null;
