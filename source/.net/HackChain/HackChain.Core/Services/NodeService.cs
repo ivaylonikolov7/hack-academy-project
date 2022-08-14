@@ -17,6 +17,10 @@ namespace HackChain.Core.Services
         private static bool _isMining = false;
         private static NodeStatusType _nodeStatusType;
         private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
+
+        private List<Block> _remoteCandidateChain = new List<Block>();
+        private List<Block> _localChainForUpdating = new List<Block>();
+
         private HackChainDbContext _db;
         private IMapper _mapper;
         private IAccountService _accountService;
@@ -381,9 +385,10 @@ namespace HackChain.Core.Services
             {
                 // longer chain found
                 // find common block
-                var lastCommonLocalBlockIndex = await GetLastCommonLocalBlock(lastLocalBlock, nodeConnector);
+                await FindLastCommonLocalBlock(lastLocalBlock, remoteBlockIndex, nodeConnector);
 
-                if (lastCommonLocalBlockIndex < lastLocalBlock.Index)
+                // potential chain reorganization
+                if (_localChainForUpdating.Count > 0)
                 {
                     // revert accounts present in transactions in blocks till the last common block
                     //_accountService.RevertTransactionData()
@@ -400,30 +405,43 @@ namespace HackChain.Core.Services
                 // get pending transactions from the node with the longest chain after syncing
                 await RefreshPendingTransactions(peerNodeUrl);
             }
-
-            
         }
 
-        private async Task<long> GetLastCommonLocalBlock(Block currentLocalBlock, INodeConnector nodeConnector)
+        private async Task FindLastCommonLocalBlock(Block currentLocalBlock, long remoteBlockIndex, INodeConnector nodeConnector)
         {
-            //TODO: cache fetched remote blocks for further processing
-            var remoteBlockDTO = await nodeConnector.GetBlockByIndex(currentLocalBlock.Index);
-            var remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
+            Block remoteBlock = null;
+            Block previousRemoteBlock = null;
+            BlockDTO remoteBlockDTO = null;
 
-            //TODO: validate missing blocks, with index larger than the current local block
-            // perform simple block validation - difficulty and hash
-            remoteBlock.Validate(_settings.Difficulty);
+            // proccessing block with index larger than lastest local block
+            while (currentLocalBlock.Index < remoteBlockIndex)
+            {
+                remoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlockIndex);
+                remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
 
-            while(currentLocalBlock.CurrentBlockHash != remoteBlock.CurrentBlockHash)
+                previousRemoteBlock = _remoteCandidateChain.LastOrDefault();
+                remoteBlock.Validate(_settings.Difficulty, previousRemoteBlock);
+
+                _remoteCandidateChain.Add(remoteBlock);
+                remoteBlockIndex--;
+            }
+
+            // looking for common previous local and previous remote block
+            while(currentLocalBlock.PreviousBlockHash != remoteBlock.PreviousBlockHash)
             {
                 long newIndex = currentLocalBlock.Index--;
                 currentLocalBlock = await GetBlockByIndex(newIndex);
                 remoteBlockDTO = await nodeConnector.GetBlockByIndex(newIndex);
                 remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
-                remoteBlock.Validate(_settings.Difficulty);
+                previousRemoteBlock = _remoteCandidateChain.LastOrDefault();
+                remoteBlock.Validate(_settings.Difficulty, previousRemoteBlock);
+
+                _remoteCandidateChain.Add(remoteBlock);
+                _localChainForUpdating.Add(currentLocalBlock);
             }
 
-            return currentLocalBlock.Index;
+            _remoteCandidateChain.Reverse();
+            _localChainForUpdating.Reverse();
         }
 
         public void PropagateTransaction(Transaction transaction)

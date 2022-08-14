@@ -77,7 +77,7 @@ namespace HackChain.Core.Extensions
 
         }
 
-        public static void Validate(this Block block, int requiredDifficulty)
+        public static void Validate(this Block block, int requiredDifficulty, Block previousBlock)
         {
             if (block.Difficulty < requiredDifficulty)
             {
@@ -97,6 +97,17 @@ namespace HackChain.Core.Extensions
             {
                 throw new HackChainException($"Provided hash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the calculated hash('{blockHash}').",
                     HackChainErrorCode.Block_Invalid_Hash);
+            }
+
+            if(previousBlock != null)
+            {
+                var blockHashesMatch = block.PreviousBlockHash == previousBlock.CurrentBlockHash;
+
+                if (blockHashesMatch == false)
+                {
+                    throw new HackChainException($"Provided PreviousBlockHash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the previous block hash('{previousBlock.CurrentBlockHash}').",
+                    HackChainErrorCode.Block_Invalid_PreviousHash);
+                }
             }
         }
     }

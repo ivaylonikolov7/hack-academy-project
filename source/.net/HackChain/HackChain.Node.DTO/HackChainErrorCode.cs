@@ -20,6 +20,7 @@
         Block_Invalid_Operation = 2000,
         Block_Invalid_Difficulty,
         Block_Invalid_Hash,
+        Block_Invalid_PreviousHash,
 
 
         Wallet_PrivateKey_Missing = 3000,
