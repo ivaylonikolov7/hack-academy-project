@@ -79,23 +79,40 @@ namespace HackChain.Core.Extensions
 
         public static void Validate(this Block block, int requiredDifficulty, long coinbaseValue, Block previousBlock)
         {
+            if (block.Index == previousBlock.Index + 1)
+            {
+                throw new HackChainException(
+                    $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has invalid Index based on the previous Block[Index='{previousBlock.Index}', Hash='{previousBlock.CurrentBlockHash}'].",
+                    HackChainErrorCode.Block_Invalid_Index);
+            }
+
+            if (block.Timestamp > previousBlock.Timestamp)
+            {
+                throw new HackChainException(
+                    $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has invalid Timestamp = '{block.Timestamp}' based on the previous Block[Index='{previousBlock.Index}', Hash='{previousBlock.CurrentBlockHash}']'s Timestamp = '{previousBlock.Timestamp}'.",
+                    HackChainErrorCode.Block_Invalid_Timestamp);
+            }
+
             if (block.Difficulty < requiredDifficulty)
             {
-                throw new HackChainException($"Provided difficulty('{block.Difficulty}') for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the required difficulty('{requiredDifficulty}').",
+                throw new HackChainException(
+                    $"Provided difficulty('{block.Difficulty}') for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the required difficulty('{requiredDifficulty}').",
                     HackChainErrorCode.Block_Invalid_Difficulty);
             }
 
             string leadingZeroes = new string('0', requiredDifficulty);
             if(block.CurrentBlockHash.StartsWith(leadingZeroes) == false)
             {
-                throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the required difficulty('{leadingZeroes}').",
+                throw new HackChainException(
+                    $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the required difficulty('{leadingZeroes}').",
                     HackChainErrorCode.Block_Invalid_Hash);
             }
 
             string blockHash = CryptoUtilities.CalculateSHA256Hex(block.SerializeForHashing());
             if (blockHash != block.CurrentBlockHash)
             {
-                throw new HackChainException($"Provided hash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the calculated hash('{blockHash}').",
+                throw new HackChainException(
+                    $"Provided hash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the calculated hash('{blockHash}').",
                     HackChainErrorCode.Block_Invalid_Hash);
             }
 
@@ -105,7 +122,8 @@ namespace HackChain.Core.Extensions
 
                 if (blockHashesMatch == false)
                 {
-                    throw new HackChainException($"Provided PreviousBlockHash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the previous block hash('{previousBlock.CurrentBlockHash}').",
+                    throw new HackChainException(
+                        $"Provided PreviousBlockHash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the previous block hash('{previousBlock.CurrentBlockHash}').",
                     HackChainErrorCode.Block_Invalid_Previous_Hash);
                 }
             }
@@ -114,7 +132,8 @@ namespace HackChain.Core.Extensions
             var coinbaseTransactionsCount = block.Data.Count(tr => tr.IsCoinbase());
             if (coinbaseTransactionsCount != 0)
             {
-                throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has incorrect Coinbase transactions count = '{coinbaseTransactionsCount}'.",
+                throw new HackChainException(
+                    $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has incorrect Coinbase transactions count = '{coinbaseTransactionsCount}'.",
                     HackChainErrorCode.Block_Invalid_Coinbase_Transactions_Count);
             }
             
@@ -123,8 +142,9 @@ namespace HackChain.Core.Extensions
             var coinbaseTransaction = block.Data.Single(tr => tr.IsCoinbase());
             if(coinbaseTransaction.Value != totalFees + coinbaseValue)
             {
-                throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has incorrect Coinbase transaction value = '{coinbaseTransaction.Value}'. Total fees = '{totalFees}', expected Block reward = '{coinbaseValue}'.",
-                    HackChainErrorCode.Block_Invalid_Coinbase_Transactions_Value);
+                throw new HackChainException(
+                    $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has incorrect Coinbase transaction value = '{coinbaseTransaction.Value}'. Total fees = '{totalFees}', expected Block reward = '{coinbaseValue}'.",
+                    HackChainErrorCode.Block_Invalid_Coinbase_Transaction_Value);
             }
 
             HashSet<string> senders = new HashSet<string>();
@@ -133,7 +153,8 @@ namespace HackChain.Core.Extensions
             {
                 if(senders.Contains(tr.Sender))
                 {
-                    throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has at least 2 transactions from the same Sender = '{tr.Sender}'.",
+                    throw new HackChainException(
+                        $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has at least 2 transactions from the same Sender = '{tr.Sender}'.",
                     HackChainErrorCode.Block_Invalid_Previous_Hash);
                 }
 

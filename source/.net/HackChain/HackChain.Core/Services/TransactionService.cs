@@ -24,7 +24,9 @@ namespace HackChain.Core.Services
         }
         public async Task AddTransaction(Transaction transaction)
         {
-            transaction.Validate();
+            var senderAccount = await _accountService.GetAccountByAddress(transaction.Sender);
+
+            transaction.Validate(senderAccount);
             var existingTransaction = await _db.Transactions.FirstOrDefaultAsync(tr => tr.Hash == transaction.Hash);
             if (existingTransaction != null)
             {
@@ -32,7 +34,7 @@ namespace HackChain.Core.Services
                     HackChainErrorCode.Transaction_Duplicate);
             }
 
-            await ValidateBalanceAndNonce(transaction);
+            await ValidateSenderUniqness(transaction);
 
             _db.Transactions.Add(transaction);
 
@@ -56,28 +58,8 @@ namespace HackChain.Core.Services
             return transactions;
         }
 
-        private async Task ValidateBalanceAndNonce(Transaction transaction)
+        private async Task ValidateSenderUniqness(Transaction transaction)
         {
-            var account = await _accountService.GetAccountByAddress(transaction.Sender);
-            long nextValidNonce = (account?.Nonce ?? 0) + 1;
-            bool hasValidNonce = transaction.Nonce == nextValidNonce;
-            // nonse should be precisely the next one
-            if (hasValidNonce == false)
-            {
-                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Nonce='{transaction.Nonce}'. The next valid Nonce is '{nextValidNonce}'.",
-                    HackChainErrorCode.Transaction_Invalid_Nonce);
-            }
-
-            long availableBallance = account?.Balance ?? 0;
-            long neededBalance = transaction.Value + transaction.Fee;
-            bool hasEnoughFunds = availableBallance >= neededBalance;
-            // account should have enough funds
-            if (hasEnoughFunds == false)
-            {
-                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] Value+Fee='{neededBalance}' is greater then the available balance='{availableBallance}'.",
-                    HackChainErrorCode.Transaction_Insufficient_Balance);
-            }
-
             var existingTransactionFromSameAddress = _db.Transactions.FirstOrDefault(t => t.Sender == transaction.Sender && t.Nonce == transaction.Nonce);
             if (existingTransactionFromSameAddress != null)
             {

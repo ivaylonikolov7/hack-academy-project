@@ -51,7 +51,7 @@ namespace HackChain.Core.Extensions
             return isValid;
         }
 
-        public static void Validate(this Transaction transaction)
+        public static void Validate(this Transaction transaction, Account senderAccount)
         {
             // sender / recipient can be parsed to public keys
             var sender = CryptoUtilities.PublicKeyFromHex(transaction.Sender);
@@ -67,7 +67,7 @@ namespace HackChain.Core.Extensions
                 throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Recipient[Address='{transaction.Sender}'].",
                     HackChainErrorCode.Transaction_Invalid_Recipient);
             }
-            // value > 0 - what about overflow? What are BigInteger's limitations? memory?
+            // value > 0 - what about overflow?
             if (transaction.Value < 0)
             {
                 throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Value='{transaction.Sender}'. Value cannot be less than 0.",
@@ -86,12 +86,31 @@ namespace HackChain.Core.Extensions
                 throw new HackChainException($"Transaction Hash missmatch. Provided Hash('{transaction.Hash}') doesn't match calculated Hash('{calculatedHash}').",
                     HackChainErrorCode.Transaction_Invalid_Hash);
             }
-            // check signiture is valid
             
+            // check signiture is valid
             if (transaction.VerifySignature() == false)
             {
                 throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Signature='{transaction.Signature}'.",
                     HackChainErrorCode.Transaction_Invalid_Signature);
+            }
+
+            long nextValidNonce = (senderAccount?.Nonce ?? 0) + 1;
+            bool hasValidNonce = transaction.Nonce == nextValidNonce;
+            // nonse should be precisely the next one
+            if (hasValidNonce == false)
+            {
+                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Nonce='{transaction.Nonce}'. The next valid Nonce is '{nextValidNonce}'.",
+                    HackChainErrorCode.Transaction_Invalid_Nonce);
+            }
+
+            long availableBallance = senderAccount?.Balance ?? 0;
+            long neededBalance = transaction.Value + transaction.Fee;
+            bool hasEnoughFunds = availableBallance >= neededBalance;
+            // account should have enough funds
+            if (hasEnoughFunds == false)
+            {
+                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] Value+Fee='{neededBalance}' is greater then the available balance='{availableBallance}'.",
+                    HackChainErrorCode.Transaction_Insufficient_Balance);
             }
         }
 

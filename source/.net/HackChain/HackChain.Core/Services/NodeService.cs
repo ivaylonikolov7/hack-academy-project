@@ -386,7 +386,7 @@ namespace HackChain.Core.Services
             {
                 // longer chain found
                 // find common block
-                await LoadConcurrentLocalAndRemoteChains(lastLocalBlock, remoteBlockIndex, nodeConnector);
+                await LoadAndValidateConcurrentLocalAndRemoteChains(lastLocalBlock, remoteBlockIndex, nodeConnector);
 
                 // potential chain reorganization
                 if (_localChainForUpdating.Count > 0)
@@ -398,7 +398,7 @@ namespace HackChain.Core.Services
                 }
 
                 // validate new chain
-                await ValidateCandidateChain();
+                await ValidateCandidateChainTransactions();
                 
 
                 // persist validated chain
@@ -408,13 +408,23 @@ namespace HackChain.Core.Services
             }
         }
 
-        private Task ValidateCandidateChain()
+        private async Task ValidateCandidateChainTransactions()
         {
-            //long nextBlockIndexForProcessing = 1; // lastCommonLocalBlockIndex++;
-            //while (nextBlockIndexForProcessing < remoteBlockIndex)
-            //{
-            //    // process blocks one by one
-            //}
+            foreach (var block in _remoteCandidateChain)
+            {
+                // validate transactions in block
+                foreach (var tr in block.Data)
+                {
+                    var sender = await GetAccountInMemory(tr.Sender);
+                    tr.Validate(sender);
+                }
+
+                // apply transactions in block
+                foreach (var tr in block.Data)
+                {
+                    await ApplyTransactionDataInMemory(tr);
+                }
+            }
         }
 
         private async Task RevertLocalBlocksInMemory(List<Block> _localChainForUpdating)
@@ -433,6 +443,20 @@ namespace HackChain.Core.Services
 
             // revert accounts present in transactions in local blocks till the last common block
             //_accountService.RevertTransactionData()
+        }
+
+        public async Task ApplyTransactionDataInMemory(Transaction transaction)
+        {
+            if (transaction.IsCoinbase() == false)
+            {
+                long spentAmount = transaction.Value + transaction.Fee;
+                var senderAccount = await GetAccountInMemory(transaction.Sender);
+                senderAccount.Balance -= spentAmount;
+                senderAccount.Nonce += 1;
+            }
+
+            var recipientAccount = await GetAccountInMemory(transaction.Recipient);
+            recipientAccount.Balance += transaction.Value;
         }
 
         private async Task RevertTransactionDataInMemory(Transaction transaction)
@@ -460,7 +484,7 @@ namespace HackChain.Core.Services
             return _accounts[address];
         }
 
-        private async Task LoadConcurrentLocalAndRemoteChains(Block currentLocalBlock, long remoteBlockIndex, INodeConnector nodeConnector)
+        private async Task LoadAndValidateConcurrentLocalAndRemoteChains(Block currentLocalBlock, long remoteBlockIndex, INodeConnector nodeConnector)
         {
             _remoteCandidateChain = new List<Block>();
             _localChainForUpdating = new List<Block>();

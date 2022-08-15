@@ -18,11 +18,13 @@
         Transaction_Duplicate,
 
         Block_Invalid_Operation = 2000,
+        Block_Invalid_Index,
+        Block_Invalid_Timestamp,
         Block_Invalid_Difficulty,
         Block_Invalid_Hash,
         Block_Invalid_Previous_Hash,
         Block_Invalid_Coinbase_Transactions_Count,
-        Block_Invalid_Coinbase_Transactions_Value,
+        Block_Invalid_Coinbase_Transaction_Value,
         Block_Invalid_Transaction_Duplicate_Sender,
 
 
