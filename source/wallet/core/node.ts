@@ -26,13 +26,13 @@ class Node {
     async getAccountInfo(address: string) {
         const response = await axios.get(`${this.url}/api/accounts/${address}`, { method: 'GET' }).catch(e => e);
 
-        return response.response.data;
+        return response?.response?.data;
     }
 
     async getAccountTxs(address: string) {
         const response = await axios.get(`${this.url}/api/accounts/${address}/transactions`, { method: 'GET' }).catch(e => e);
 
-        return response.response.data;
+        return response?.response?.data;
     }
 }
 
