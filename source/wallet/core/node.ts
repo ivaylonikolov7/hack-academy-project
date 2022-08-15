@@ -1,3 +1,4 @@
+import axios from "axios";
 import WalletError from "./wallet-error";
 
 class Node {
@@ -10,36 +11,28 @@ class Node {
     }
 
     async broadcastTransaction(tx: any) {
-        const response = await fetch(`${this.url}/api/transactions/add`, {
-            method: 'POST',
-            headers: new Headers({ 'content-type': 'application/json' }),
-            body: tx,
-        });
+        const response = await axios.post(`${this.url}/api/transactions/add`, tx, { headers: {
+            'Content-Type': 'application/json',
+        }}).catch(e => e);
 
-        const result = await response.json();
-
-        if (result.ok) {
-            return result;
+        if (response?.response?.status === 200) {
+            return response.response;
         }
 
 
-        throw new WalletError(result.errors[0]);
+        throw new WalletError(response.response.data.errors[0]);
     }
 
     async getAccountInfo(address: string) {
-        const response = await fetch(`${this.url}/api/accounts/${address}`, { method: 'GET' });
+        const response = await axios.get(`${this.url}/api/accounts/${address}`, { method: 'GET' }).catch(e => e);
 
-        const { data } = await response.json();
-
-        return data;
+        return response.response.data;
     }
 
     async getAccountTxs(address: string) {
-        const response = await fetch(`${this.url}/api/accounts/${address}/transactions`, { method: 'GET' });
+        const response = await axios.get(`${this.url}/api/accounts/${address}/transactions`, { method: 'GET' }).catch(e => e);
 
-        const { data } = await response.json();
-
-        return data;
+        return response.response.data;
     }
 }
 
