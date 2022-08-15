@@ -35,6 +35,7 @@ export default {
   .main-content {
     padding: 80px 40px;
     margin: auto;
+    width: 336px;
   }
 }
 </style>

@@ -2,21 +2,27 @@
   <div>
     <div class="account">
       <div class="address">
-        {{ $store.getters["accounts/active"].publicKey }}
+        <Address :address="address" />
       </div>
-      <div class="balance">{{ $store.state.accounts.balance }} HCK</div>
+      <div class="balance">{{ $store.state.accounts.balance }} HCT</div>
     </div>
+    <router-link to="send" class="send btn btn-primary">Send</router-link>
+    <h3>Transactions History</h3>
     <Transactions />
-    <Send @send="sendTx" />
   </div>
 </template>
 
 <script>
-import Send from "../components/Send.vue";
+import Address from "../components/Address.vue";
 import Transactions from "../components/Transactions.vue";
 
 export default {
-  components: { Send, Transactions },
+  components: { Address, Transactions },
+  computed: {
+    address() {
+      return this.$store.getters["accounts/active"].publicKey;
+    },
+  },
 };
 </script>
 
@@ -24,16 +30,20 @@ export default {
 .account {
   background-color: var(--secondary-color);
   color: var(--primary-light);
-  padding: 8px;
+  padding: 12px 8px 8px;
   text-align: center;
   border-radius: 4px;
 
-  .address {
-    
-  }
-
   .balance {
     font-size: 36px;
+    margin-top: 12px;
   }
+}
+
+a.send {
+  display: inline-block;
+  width: 100%;
+  margin-top: 16px;
+  text-decoration: none;
 }
 </style>
