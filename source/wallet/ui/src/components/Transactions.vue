@@ -9,15 +9,17 @@
       <div class="sender"><label>From:</label> <Address :address="tx.sender" /></div>
       <div class="recipient"><label>To:</label> <Address :address="tx.recipient" /></div>
       <div class="amount">
-        <span class="sign">{{ tx.type === "sent" ? "-" : "+" }}</span> {{ tx.value }} HCT
+        <span class="sign">{{ tx.type === "sent" ? "-" : "+" }}</span>{{ tx.value }} HCT
       </div>
+    </div>
+    <div v-if="!transactions.length" class="no-transactions">
+      No transactions for this account!
     </div>
   </div>
 </template>
 
 <script>
 import Address from "./Address.vue";
-
 export default {
   components: { Address },
   computed: {
@@ -45,7 +47,7 @@ export default {
     padding: 8px 0;
 
     &:not(:last-child) {
-      border-bottom: 1px solid #000;
+      border-bottom: 1px solid #efefef;
     }
 
     .amount {
@@ -62,25 +64,31 @@ export default {
 
     .address {
       font-size: 14px;
+      background-color: var(--primary-light);
     }
 
     &.sent {
       .amount {
-        color: red;
+        color: var(--primary-red);
       }
     }
 
     &.received {
       .amount {
-        color: green;
+        color: var(--primary-green);
       }
     }
 
     .sender,
     .recipient {
-      max-width: 100px;
+      max-width: 90px;
       flex: 0 0 auto;
     }
+  }
+
+  .no-transactions {
+    font-size: 14px;
+    color: #8f8f8f;
   }
 }
 </style>

@@ -36,7 +36,7 @@ export default {
       const accountInfo =
         await rootState.wallet.instance.getActiveAccountInfo();
 
-      commit("setBalance", accountInfo.balance);
+      commit("setBalance", accountInfo?.balance ?? 0);
     },
 
     async fetchTransactions({ commit, rootState }) {

@@ -1,6 +1,7 @@
 import Account from "./account";
 import Node from './node';
 import Transaction from './transaction';
+import WalletError from './wallet-error';
 
 class Wallet {
     public accounts: Map<string, Account> = new Map();
@@ -42,11 +43,11 @@ class Wallet {
         const accountInfo = await node.getAccountInfo(this.selectedAccount);
 
         if (!accountInfo) {
-            throw new Error('Cannot fetch account info');
+            throw new WalletError({ error: 'Cannot fetch account info', errorCode: 'Missing_Account_Info' });
         }
 
         if (accountInfo.balance < rawTx.value + rawTx.fee) {
-            throw new Error('Insufficient funds');
+            throw new WalletError({ error: 'This account has insufficient funds', errorCode: 'Insufficient funds' });
         }
 
         const tx = new Transaction(this.selectedAccount,

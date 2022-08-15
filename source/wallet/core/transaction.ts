@@ -52,7 +52,6 @@ export default class {
         }
 
         if (!this.value) {
-            console.log(this.value);
             throw new Error('Tx: valid value is required');
         }
 

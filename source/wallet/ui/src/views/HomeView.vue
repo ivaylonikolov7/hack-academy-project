@@ -2,7 +2,7 @@
   <div>
     <div class="account">
       <div class="address">
-        <Address :address="address" />
+        <Address :address="address" copy />
       </div>
       <div class="balance">{{ $store.state.accounts.balance }} HCT</div>
     </div>
@@ -30,9 +30,13 @@ export default {
 .account {
   background-color: var(--secondary-color);
   color: var(--primary-light);
-  padding: 12px 8px 8px;
+  padding: 24px 8px;
   text-align: center;
   border-radius: 4px;
+
+  .address {
+    background-color: var(--secondary-color);
+  }
 
   .balance {
     font-size: 36px;

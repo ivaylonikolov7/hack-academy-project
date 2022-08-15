@@ -1,3 +1,5 @@
+import WalletError from "./wallet-error";
+
 class Node {
     public id: string;
     public url: string;
@@ -14,8 +16,14 @@ class Node {
             body: tx,
         });
 
+        const result = await response.json();
 
-        return response.json();
+        if (result.ok) {
+            return result;
+        }
+
+
+        throw new WalletError(result.errors[0]);
     }
 
     async getAccountInfo(address: string) {

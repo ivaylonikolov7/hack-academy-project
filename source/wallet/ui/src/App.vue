@@ -1,5 +1,4 @@
 <script>
-import { RouterView } from "vue-router";
 import Header from "./components/Header.vue";
 
 export default {
@@ -36,6 +35,7 @@ export default {
     padding: 80px 40px;
     margin: auto;
     width: 336px;
+    overflow-y: auto;
   }
 }
 </style>
