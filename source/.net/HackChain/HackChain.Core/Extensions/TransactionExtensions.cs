@@ -53,13 +53,43 @@ namespace HackChain.Core.Extensions
 
         public static void Validate(this Transaction transaction, Account senderAccount)
         {
-            // sender / recipient can be parsed to public keys
-            var sender = CryptoUtilities.PublicKeyFromHex(transaction.Sender);
-            if(sender == null)
+            if (transaction.IsCoinbase() == false)
             {
-                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Sender[Address='{transaction.Sender}'].",
-                    HackChainErrorCode.Transaction_Invalid_Sender);
+                // sender / recipient can be parsed to public keys
+                var sender = CryptoUtilities.PublicKeyFromHex(transaction.Sender);
+                if (sender == null)
+                {
+                    throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Sender[Address='{transaction.Sender}'].",
+                        HackChainErrorCode.Transaction_Invalid_Sender);
+                }
+
+                // check signiture is valid
+                if (transaction.VerifySignature() == false)
+                {
+                    throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Signature='{transaction.Signature}'.",
+                        HackChainErrorCode.Transaction_Invalid_Signature);
+                }
+
+                long nextValidNonce = (senderAccount?.Nonce ?? 0) + 1;
+                bool hasValidNonce = transaction.Nonce == nextValidNonce;
+                // nonse should be precisely the next one
+                if (hasValidNonce == false)
+                {
+                    throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Nonce='{transaction.Nonce}'. The next valid Nonce is '{nextValidNonce}'.",
+                        HackChainErrorCode.Transaction_Invalid_Nonce);
+                }
+
+                long availableBallance = senderAccount?.Balance ?? 0;
+                long neededBalance = transaction.Value + transaction.Fee;
+                bool hasEnoughFunds = availableBallance >= neededBalance;
+                // account should have enough funds
+                if (hasEnoughFunds == false)
+                {
+                    throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] Value+Fee='{neededBalance}' is greater then the available balance='{availableBallance}'.",
+                        HackChainErrorCode.Transaction_Insufficient_Balance);
+                }
             }
+            
 
             var recipient = CryptoUtilities.PublicKeyFromHex(transaction.Recipient);
             if (recipient == null)
@@ -85,33 +115,7 @@ namespace HackChain.Core.Extensions
             {
                 throw new HackChainException($"Transaction Hash missmatch. Provided Hash('{transaction.Hash}') doesn't match calculated Hash('{calculatedHash}').",
                     HackChainErrorCode.Transaction_Invalid_Hash);
-            }
-            
-            // check signiture is valid
-            if (transaction.VerifySignature() == false)
-            {
-                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Signature='{transaction.Signature}'.",
-                    HackChainErrorCode.Transaction_Invalid_Signature);
-            }
-
-            long nextValidNonce = (senderAccount?.Nonce ?? 0) + 1;
-            bool hasValidNonce = transaction.Nonce == nextValidNonce;
-            // nonse should be precisely the next one
-            if (hasValidNonce == false)
-            {
-                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] has invalid Nonce='{transaction.Nonce}'. The next valid Nonce is '{nextValidNonce}'.",
-                    HackChainErrorCode.Transaction_Invalid_Nonce);
-            }
-
-            long availableBallance = senderAccount?.Balance ?? 0;
-            long neededBalance = transaction.Value + transaction.Fee;
-            bool hasEnoughFunds = availableBallance >= neededBalance;
-            // account should have enough funds
-            if (hasEnoughFunds == false)
-            {
-                throw new HackChainException($"Transaction[Hash='{transaction.Hash}'] Value+Fee='{neededBalance}' is greater then the available balance='{availableBallance}'.",
-                    HackChainErrorCode.Transaction_Insufficient_Balance);
-            }
+            }           
         }
 
         public static bool IsCoinbase(this Transaction transaction)

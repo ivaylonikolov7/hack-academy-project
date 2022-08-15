@@ -3,11 +3,7 @@ using HackChain.Core.Model;
 using HackChain.Node.DTO;
 using HackChain.Utilities;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace HackChain.Core.Extensions
 {
@@ -79,14 +75,14 @@ namespace HackChain.Core.Extensions
 
         public static void Validate(this Block block, int requiredDifficulty, long coinbaseValue, Block previousBlock)
         {
-            if (block.Index == previousBlock.Index + 1)
+            if (block.Index != previousBlock.Index + 1)
             {
                 throw new HackChainException(
                     $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has invalid Index based on the previous Block[Index='{previousBlock.Index}', Hash='{previousBlock.CurrentBlockHash}'].",
                     HackChainErrorCode.Block_Invalid_Index);
             }
 
-            if (block.Timestamp > previousBlock.Timestamp)
+            if (block.Timestamp <= previousBlock.Timestamp)
             {
                 throw new HackChainException(
                     $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has invalid Timestamp = '{block.Timestamp}' based on the previous Block[Index='{previousBlock.Index}', Hash='{previousBlock.CurrentBlockHash}']'s Timestamp = '{previousBlock.Timestamp}'.",
@@ -116,21 +112,18 @@ namespace HackChain.Core.Extensions
                     HackChainErrorCode.Block_Invalid_Hash);
             }
 
-            if(previousBlock != null)
-            {
-                var blockHashesMatch = block.PreviousBlockHash == previousBlock.CurrentBlockHash;
+            var blockHashesMatch = block.PreviousBlockHash == previousBlock.CurrentBlockHash;
 
-                if (blockHashesMatch == false)
-                {
-                    throw new HackChainException(
-                        $"Provided PreviousBlockHash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the previous block hash('{previousBlock.CurrentBlockHash}').",
-                    HackChainErrorCode.Block_Invalid_Previous_Hash);
-                }
+            if (blockHashesMatch == false)
+            {
+                throw new HackChainException(
+                    $"Provided PreviousBlockHash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the previous block hash('{previousBlock.CurrentBlockHash}').",
+                HackChainErrorCode.Block_Invalid_Previous_Hash);
             }
 
             //there is exactly one coinbase transaction
             var coinbaseTransactionsCount = block.Data.Count(tr => tr.IsCoinbase());
-            if (coinbaseTransactionsCount != 0)
+            if (coinbaseTransactionsCount != 1)
             {
                 throw new HackChainException(
                     $"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has incorrect Coinbase transactions count = '{coinbaseTransactionsCount}'.",

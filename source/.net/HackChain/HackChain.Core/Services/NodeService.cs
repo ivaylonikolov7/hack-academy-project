@@ -19,7 +19,7 @@ namespace HackChain.Core.Services
         private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
 
         private List<Block> _remoteCandidateChain;
-        private List<Block> _localChainForUpdating;
+        private List<Block> _localChainForUpdatingReverse;
         private Dictionary<string, Account> _accounts;
 
         private HackChainDbContext _db;
@@ -66,7 +66,6 @@ namespace HackChain.Core.Services
                 var transactions = await _db.Transactions
                     .Where(tr => tr.BlockId == null)
                     .OrderByDescending(tr => tr.Fee)
-                    .Take(10)
                     .ToListAsync();
 
                 var lastBlock = await GetLastBlock();
@@ -160,8 +159,8 @@ namespace HackChain.Core.Services
             long nonce = 0;
             do
             {
-                hash = CryptoUtilities.CalculateSHA256Hex(blockForHashing.Replace(BlockNoncePlaceholder, nonce.ToString()));
                 nonce++;
+                hash = CryptoUtilities.CalculateSHA256Hex(blockForHashing.Replace(BlockNoncePlaceholder, nonce.ToString()));
             }
             while (hash.StartsWith(leadingZeroes) == false);
 
@@ -193,18 +192,22 @@ namespace HackChain.Core.Services
         public async Task Init()
         {
             await TryAddGenesisBlock();
-            _nodeStatusType = NodeStatusType.Syncing;
 
-            // connect to all known nodes and their peers
-            await ConnectToPeerNodes();
+            if (_settings.SyncOnStartup)
+            {
+                _nodeStatusType = NodeStatusType.Syncing;
 
-            // get the longest chain - pick 1 node
-            // sync the missing blocks
-            
-            //perform sync
-            await TryAddBlock(_nodeWithLongestChain.LastBlockIndex, _nodeWithLongestChain.BaseUrl);
-                
-            _nodeStatusType = NodeStatusType.Synced;
+                // connect to all known nodes and their peers
+                await ConnectToPeerNodes();
+
+                // get the longest chain - pick 1 node
+                // sync the missing blocks
+
+                //perform sync
+                await TryAddBlock(_nodeWithLongestChain.LastBlockIndex, _nodeWithLongestChain.BaseUrl);
+
+                _nodeStatusType = NodeStatusType.Synced;
+            }
 
             return;
         }
@@ -333,8 +336,12 @@ namespace HackChain.Core.Services
 
             var nodeStatus = await nodeConnector.GetNodeStatus();
 
-            if(_nodeWithLongestChain == null
-                || _nodeWithLongestChain.LastBlockIndex < nodeStatus.LastBlockIndex)
+            if (_nodeWithLongestChain == null)
+            {
+                _nodeWithLongestChain = nodeStatus;
+            }
+
+            if(_nodeWithLongestChain.LastBlockIndex < nodeStatus.LastBlockIndex)
             {
                 _nodeWithLongestChain = nodeStatus;
             }
@@ -381,17 +388,16 @@ namespace HackChain.Core.Services
             var nodeConnector = GetNodeConnector(peerNodeUrl);
 
             var lastLocalBlock = await GetLastBlock();
-            if(lastLocalBlock != null
-                && lastLocalBlock.Index < remoteBlockIndex)
+            if(lastLocalBlock.Index < remoteBlockIndex)
             {
                 // longer chain found
                 // find common block
                 await LoadAndValidateConcurrentLocalAndRemoteChains(lastLocalBlock, remoteBlockIndex, nodeConnector);
 
                 // potential chain reorganization
-                if (_localChainForUpdating.Count > 0)
+                if (_localChainForUpdatingReverse.Count > 0)
                 {
-                    await RevertLocalBlocksInMemory(_localChainForUpdating);
+                    await RevertLocalBlocksInMemory();
                     
                     // delete transactions in blocks till the last common block?
                     // we need to delete transactions, because the assumtion is that only valid transactions are in the mem pool - not the case when reverting mulitple blocks
@@ -415,10 +421,17 @@ namespace HackChain.Core.Services
                 try
                 {
                     // revert local chain
-                    foreach (var block in _localChainForUpdating)
+                    foreach (var block in _localChainForUpdatingReverse)
                     {
+                        foreach (var tr in block.Data)
+                        {
+                            await _accountService.RevertTransactionData(tr);
+                        }
+
                         _db.Transactions.RemoveRange(block.Data);
                         _db.Blocks.Remove(block);
+
+                        await _db.SaveChangesAsync();
                     }
 
                     var pendingTransactions = await _db.Transactions
@@ -426,11 +439,14 @@ namespace HackChain.Core.Services
                         .ToListAsync();
                     _db.Transactions.RemoveRange(pendingTransactions);
 
-                    // accounts loaded in _accounts Dictionary will also be updated
                     await _db.SaveChangesAsync();
 
 
                     // save remote chain
+                    foreach (var block in _remoteCandidateChain)
+                    {
+                        await UpdateAccounts(block);
+                    }
                     _db.Blocks.AddRange(_remoteCandidateChain);
                     await _db.SaveChangesAsync();
 
@@ -445,12 +461,22 @@ namespace HackChain.Core.Services
 
         private async Task ValidateCandidateChainTransactions()
         {
-            foreach (var block in _remoteCandidateChain)
+            if (_accounts == null)
+            {
+                _accounts = new Dictionary<string, Account>();
+            }
+
+            foreach (var block  in _remoteCandidateChain)
             {
                 // validate transactions in block
                 foreach (var tr in block.Data)
                 {
-                    var sender = await GetAccountInMemory(tr.Sender);
+                    Account sender = null;
+                    if (tr.IsCoinbase() == false)
+                    {
+                        sender = await GetAccountInMemory(tr.Sender);
+                    }
+
                     tr.Validate(sender);
                 }
 
@@ -462,22 +488,19 @@ namespace HackChain.Core.Services
             }
         }
 
-        private async Task RevertLocalBlocksInMemory(List<Block> _localChainForUpdating)
+        private async Task RevertLocalBlocksInMemory()
         {
             _accounts = new Dictionary<string, Account>();
 
-            for (int i = _localChainForUpdating.Count-1; i < 0; i--)
+            foreach (var block in _localChainForUpdatingReverse)
             {
-                var block = _localChainForUpdating[i];
-
                 foreach (var tr in block.Data)
                 {
                     await RevertTransactionDataInMemory(tr);
                 }
             }
 
-            // revert accounts present in transactions in local blocks till the last common block
-            //_accountService.RevertTransactionData()
+            // revert accounts present in transactions in local blocks till the last common block - not needed
         }
 
         public async Task ApplyTransactionDataInMemory(Transaction transaction)
@@ -512,7 +535,19 @@ namespace HackChain.Core.Services
         {
             if(_accounts.ContainsKey(address) ==false)
             {
-                var account = await _accountService.GetAccountByAddress(address);
+                var account = await _db.Accounts
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.Address == address);
+
+                if (account == null)
+                {
+                    account = new Account
+                    {
+                        Address = address,
+                        Balance = 0,
+                        Nonce = 0
+                    };
+                }
                 _accounts[address] = account;
             }
             
@@ -522,41 +557,46 @@ namespace HackChain.Core.Services
         private async Task LoadAndValidateConcurrentLocalAndRemoteChains(Block currentLocalBlock, long remoteBlockIndex, INodeConnector nodeConnector)
         {
             _remoteCandidateChain = new List<Block>();
-            _localChainForUpdating = new List<Block>();
+            _localChainForUpdatingReverse = new List<Block>();
 
             Block remoteBlock = null;
             Block previousRemoteBlock = null;
             BlockDTO remoteBlockDTO = null;
 
+            remoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlockIndex);
+            remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
+
             // proccessing block with index larger than latest local block
             while (currentLocalBlock.Index < remoteBlockIndex)
             {
-                remoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlockIndex);
-                remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
+                var previousRemoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlockIndex - 1);
+                previousRemoteBlock = _mapper.Map<Block>(previousRemoteBlockDTO);
 
-                previousRemoteBlock = _remoteCandidateChain.LastOrDefault();
                 remoteBlock.Validate(_settings.Difficulty, _settings.CoinbaseValue, previousRemoteBlock);
 
                 _remoteCandidateChain.Add(remoteBlock);
                 remoteBlockIndex--;
+                remoteBlock = previousRemoteBlock;
             }
 
+            remoteBlock = _remoteCandidateChain.Last();
             // looking for common previous local and previous remote block
-            while(currentLocalBlock.PreviousBlockHash != remoteBlock.PreviousBlockHash)
+            while (currentLocalBlock.CurrentBlockHash != remoteBlock.PreviousBlockHash)
             {
                 long newIndex = currentLocalBlock.Index--;
                 currentLocalBlock = await GetBlockByIndex(newIndex);
-                remoteBlockDTO = await nodeConnector.GetBlockByIndex(newIndex);
-                remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
-                previousRemoteBlock = _remoteCandidateChain.LastOrDefault();
+
+                var previousRemoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlock.Index - 1);
+                previousRemoteBlock = _mapper.Map<Block>(previousRemoteBlockDTO);
+
                 remoteBlock.Validate(_settings.Difficulty, _settings.CoinbaseValue, previousRemoteBlock);
 
                 _remoteCandidateChain.Add(remoteBlock);
-                _localChainForUpdating.Add(currentLocalBlock);
+                _localChainForUpdatingReverse.Add(currentLocalBlock);
+                remoteBlock = previousRemoteBlock;
             }
 
             _remoteCandidateChain.Reverse();
-            _localChainForUpdating.Reverse();
         }
 
         public void PropagateTransaction(Transaction transaction)
