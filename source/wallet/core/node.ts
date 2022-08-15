@@ -16,7 +16,7 @@ class Node {
         }}).catch(e => e);
 
         if (response?.status === 200) {
-            return response.response.data;
+            return response?.data.data;
         }
 
 
