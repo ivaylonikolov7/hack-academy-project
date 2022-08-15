@@ -77,7 +77,7 @@ namespace HackChain.Core.Extensions
 
         }
 
-        public static void Validate(this Block block, int requiredDifficulty, Block previousBlock)
+        public static void Validate(this Block block, int requiredDifficulty, long coinbaseValue, Block previousBlock)
         {
             if (block.Difficulty < requiredDifficulty)
             {
@@ -106,8 +106,38 @@ namespace HackChain.Core.Extensions
                 if (blockHashesMatch == false)
                 {
                     throw new HackChainException($"Provided PreviousBlockHash for Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] doesn't match the previous block hash('{previousBlock.CurrentBlockHash}').",
-                    HackChainErrorCode.Block_Invalid_PreviousHash);
+                    HackChainErrorCode.Block_Invalid_Previous_Hash);
                 }
+            }
+
+            //there is exactly one coinbase transaction
+            var coinbaseTransactionsCount = block.Data.Count(tr => tr.IsCoinbase());
+            if (coinbaseTransactionsCount != 0)
+            {
+                throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has incorrect Coinbase transactions count = '{coinbaseTransactionsCount}'.",
+                    HackChainErrorCode.Block_Invalid_Coinbase_Transactions_Count);
+            }
+            
+            //the summed fees match the coinbase transaction
+            var totalFees = block.Data.Sum(tr => tr.Fee);
+            var coinbaseTransaction = block.Data.Single(tr => tr.IsCoinbase());
+            if(coinbaseTransaction.Value != totalFees + coinbaseValue)
+            {
+                throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has incorrect Coinbase transaction value = '{coinbaseTransaction.Value}'. Total fees = '{totalFees}', expected Block reward = '{coinbaseValue}'.",
+                    HackChainErrorCode.Block_Invalid_Coinbase_Transactions_Value);
+            }
+
+            HashSet<string> senders = new HashSet<string>();
+            //validate only 1 transaction per sender
+            foreach (var tr in block.Data)
+            {
+                if(senders.Contains(tr.Sender))
+                {
+                    throw new HackChainException($"Block[Index='{block.Index}', Hash='{block.CurrentBlockHash}'] has at least 2 transactions from the same Sender = '{tr.Sender}'.",
+                    HackChainErrorCode.Block_Invalid_Previous_Hash);
+                }
+
+                senders.Add(tr.Sender);
             }
         }
     }
