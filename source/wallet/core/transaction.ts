@@ -1,6 +1,7 @@
 import { Transaction } from "./types";
 import { sha256 } from 'js-sha256';
 import WalletError from "./wallet-error";
+import { validPublicKey } from "./utils";
 
 export default class {
     sender: string;
@@ -40,11 +41,11 @@ export default class {
     }
 
     public validate() {
-        if (!this.sender) {
+        if (!this.sender || (this.sender && !validPublicKey(this.sender))) {
             throw new WalletError({ error: 'Invalid transaction sender', errorCode: 'Transaction_Invalid_Sender' });
         }
 
-        if (!this.recipient) {
+        if (!this.recipient || (this.recipient && !validPublicKey(this.recipient))) {
             throw new WalletError({ error: 'Invalid transaction recipient', errorCode: 'Transaction_Invalid_Recipient' });
         }
 
