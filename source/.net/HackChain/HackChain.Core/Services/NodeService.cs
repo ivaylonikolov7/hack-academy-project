@@ -399,12 +399,47 @@ namespace HackChain.Core.Services
 
                 // validate new chain
                 await ValidateCandidateChainTransactions();
-                
 
                 // persist validated chain
+                await PersistRemoteChain();
 
                 // get pending transactions from the node with the longest chain after syncing
                 await RefreshPendingTransactions(peerNodeUrl);
+            }
+        }
+
+        private async Task PersistRemoteChain()
+        {
+            using (var dbTransaction = await _db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // revert local chain
+                    foreach (var block in _localChainForUpdating)
+                    {
+                        _db.Transactions.RemoveRange(block.Data);
+                        _db.Blocks.Remove(block);
+                    }
+
+                    var pendingTransactions = await _db.Transactions
+                        .Where(tr => tr.BlockId == null)
+                        .ToListAsync();
+                    _db.Transactions.RemoveRange(pendingTransactions);
+
+                    // accounts loaded in _accounts Dictionary will also be updated
+                    await _db.SaveChangesAsync();
+
+
+                    // save remote chain
+                    _db.Blocks.AddRange(_remoteCandidateChain);
+                    await _db.SaveChangesAsync();
+
+                    dbTransaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    await dbTransaction.RollbackAsync();
+                }
             }
         }
 
