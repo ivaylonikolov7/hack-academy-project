@@ -1,37 +1,8 @@
 # FAUCET
+intro bla bla This project is for...
 
+## Usage
 
-## Backend
+You can find more instructions how to setup and use the backend of the project in the [`README.md`](backend/README.md) file in the backend folder.
 
-```
-yarn install
-```
-
-To build the project:
-```
-yarn run build
-```
-
-To start the server:
-```
-yarn run start
-```
-
-## Database
-install MongoDB on your PC
-
-## Frontend
-```
-yarn install
-```
-
-build the project with
-```
-yarn run build
-```
-
-Start the frontend with
-```
-yarn run start
-```
-
+You can find more instructions how to setup and use the frontend of the project in the [`README.md`](frontend/README.md) file in the frontend folder.

@@ -25,7 +25,7 @@ class Node {
 
     async getAccountInfo(address: string) {
         const response = await axios.get(`${this.url}/api/accounts/${address}`, { method: 'GET' }).catch(e => e);
-
+        console.log(response)
         return response?.data.data;
     }
 

@@ -16,6 +16,9 @@ function App() {
       address: address,
     })
     .then(function (response) {
+      console.log(response)
+      console.log("Data:")
+      console.log(response.data)
       setHash(response.data);
     })
     .catch(function (error) {
@@ -48,7 +51,7 @@ function App() {
       </button>
       {hash && <div>
         <span>Transaction URL: </span>
-        <a href="https://TODO_EXPLORER_URL/transaction/{hash}">https://TODO_EXPLORER_URL/transaction/{hash}</a>
+        <a href={`http://hackchain.pirin.pro/api/transactions/${hash}`}>http://hackchain.pirin.pro/api/transactions/{hash}</a>
       </div>}
     </div>
   );
