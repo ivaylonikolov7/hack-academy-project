@@ -1,7 +1,5 @@
-// @ts-nocheck
-
 import elliptic from 'elliptic';
-import sha256 from 'js-sha256';
+import { sha256 } from 'js-sha256';
 
 import { hexToBase64 } from './utils';
 

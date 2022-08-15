@@ -15,24 +15,24 @@ class Node {
             'Content-Type': 'application/json',
         }}).catch(e => e);
 
-        if (response?.response?.status === 200) {
-            return response.response;
+        if (response?.status === 200) {
+            return response.response.data;
         }
 
 
-        throw new WalletError(response.response.data.errors[0]);
+        throw new WalletError(response?.response.data.errors[0]);
     }
 
     async getAccountInfo(address: string) {
         const response = await axios.get(`${this.url}/api/accounts/${address}`, { method: 'GET' }).catch(e => e);
 
-        return response?.response?.data;
+        return response?.data.data;
     }
 
     async getAccountTxs(address: string) {
         const response = await axios.get(`${this.url}/api/accounts/${address}/transactions`, { method: 'GET' }).catch(e => e);
 
-        return response?.response?.data;
+        return response?.data.data;
     }
 }
 
