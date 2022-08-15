@@ -1,5 +1,6 @@
 import { Transaction } from "./types";
 import { sha256 } from 'js-sha256';
+import WalletError from "./wallet-error";
 
 export default class {
     sender: string;
@@ -40,23 +41,23 @@ export default class {
 
     public validate() {
         if (!this.sender) {
-            throw new Error('Tx: valid sender is required');
+            throw new WalletError({ error: 'Invalid transaction sender', errorCode: 'Transaction_Invalid_Sender' });
         }
 
         if (!this.recipient) {
-            throw new Error('Tx: valid recipient is required');
+            throw new WalletError({ error: 'Invalid transaction recipient', errorCode: 'Transaction_Invalid_Recipient' });
         }
 
         if (!this.nonce && this.nonce !== 0) {
-            throw new Error('Tx: valid nonce is required');
+            throw new WalletError({ error: 'Invalid transaction nonce', errorCode: 'Transaction_Invalid_Nonce' });
         }
 
-        if (!this.value) {
-            throw new Error('Tx: valid value is required');
+        if (!this.value || !Number(this.value)) {
+            throw new WalletError({ error: 'Invalid transaction value', errorCode: 'Transaction_Invalid_Value' });
         }
 
-        if (!this.fee && this.fee !== 0) {
-            throw new Error('Tx: valid fee is required');
+        if (!this.fee && this.fee !== 0 || (this.fee && !Number(this.fee))) {
+            throw new WalletError({ error: 'Invalid transaction fee', errorCode: 'Transaction_Invalid_Fee' });
         }
     }
 
