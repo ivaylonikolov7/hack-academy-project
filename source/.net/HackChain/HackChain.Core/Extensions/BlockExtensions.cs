@@ -20,7 +20,7 @@ namespace HackChain.Core.Extensions
         }
         public static string SerializeForMining(this Block b)
         {
-            var dataString = $"{string.Join(',', b.Data.Select(t => t.SerializeForBlockHashing()))}";
+            var dataString = $"{string.Join(',', b.Data.OrderBy(tr => tr.Recipient).Select(t => t.SerializeForBlockHashing()))}";
             var result = $"{{\"Index\": {b.Index},\"Timestamp\": {b.Timestamp},\"Data\": [{dataString}],\"PreviousBlockHash\": \"{ b.PreviousBlockHash}\",\"Nonce\": {BlockNoncePlaceholder},\"Difficulty\": {b.Difficulty}}}";
 
             return result;
