@@ -5,5 +5,154 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">HackChain Node</h1>
+    <h2 class="display-4">HackChain Node Dashboard</h2>
+</div>
+<div class="container">
+    <div class="row">
+        <dl class="col-md-4">
+            <dt class="col-sm-4">Node Id</dt>
+            <dd class="col-sm-8">@Model.Status.NodeId</dd>
+            <dt class="col-sm-4">Base Url</dt>
+            <dd class="col-sm-8">@Model.Status.BaseUrl</dd>
+            <dt class="col-sm-4">Status</dt>
+            <dd class="col-sm-8">@Model.Status.Status</dd>
+        </dl>
+        <dl class="col-md-4">
+            <dt class="col-sm-8">Processed Transactions</dt>
+            <dd class="col-sm-4">@Model.Status.ProcessedTransactionsCount</dd>
+            <dt class="col-sm-8">Pending Transactions</dt>
+            <dd class="col-sm-4">@Model.Status.PendingTransactionsCount</dd>
+            <dt class="col-sm-8">Non Zero Addresses</dt>
+            <dd class="col-sm-4">@Model.Status.NonZeroAddressesCount</dd>
+        </dl>
+        <dl class="col-md-4">
+            <dt class="col-sm-4">Last Block Index</dt>
+            <dd class="col-sm-8">@Model.Status.LastBlockIndex</dd>
+            <dt class="col-sm-4">Last Block Hash</dt>
+            <dd class="col-sm-8">@Model.Status.LastBlockHash</dd>
+            <dt class="col-sm-4">Last Block Timestamp</dt>
+            <dd class="col-sm-8">@Model.Status.LastBlockTimestamp</dd>
+        </dl>
+    </div>
+    
+  <div class="row">
+    <div class="col-md-8">
+      <h4>Blocks</h4>
+      <div class="row">
+          <div class="col-md-1">
+              Index
+          </div>
+          <div class="col-md-1">
+              Difficulty
+          </div>
+          <div class="col-md-2">
+              Timestamp
+          </div>
+          <div class="col-md-2">
+              Transactions
+          </div>
+          <div class="col-md-2">
+              Hash
+          </div>
+      </div>
+      @foreach(var block in Model.Blocks)
+        {
+            <div class="row">
+                <div class="col-md-1">
+                    <a href="/api/blocks/@block.Index" target="_blank">@block.Index</a>
+                </div>
+                <div class="col-md-1">
+                    @block.Difficulty
+                </div>
+                <div class="col-md-2">
+                    @block.Timestamp
+                </div>
+                <div class="col-md-2">
+                    @block.Data.Count
+                </div>
+                <div class="col-md-2">
+                    @block.CurrentBlockHash
+                </div>
+            </div>   
+        }
+    </div>
+  </div>
+
+  <div class="row">
+
+      <h4>Accounts</h4>
+      <div class="row">
+          <div class="col-md-1">
+              Nonce
+          </div>
+          <div class="col-md-1">
+              Balance
+          </div>
+          <div class="col-md-1">
+              Transactions
+          </div>
+          <div class="col-md-9">
+              Address
+          </div>
+      </div>
+      @foreach(var account in Model.Accounts)
+        {
+            <div class="row">
+                <div class="col-md-1">
+                    @account.Nonce
+                </div>
+                <div class="col-md-1">
+                    @account.Balance
+                </div>
+                <div class="col-md-1">
+                    <a href="/api/accounts/@account.Address/transactions" target="_blank">View</a>
+                </div>
+                <div class="col-md-9">
+                    <a href="/api/accounts/@account.Address" target="_blank">@account.Address</a>
+                </div>
+            </div>   
+        }
+  </div>
+
+  <div class="row">
+
+      <h4>Pending Transactions</h4>
+      <div class="row">
+          <div class="col-md-6">
+              Hash
+          </div>
+          <div class="col-md-1">
+              Value
+          </div>
+          <div class="col-md-1">
+              Fee
+          </div>
+          <div class="col-md-1">
+              Nonce
+          </div>
+      </div>
+      @foreach(var tr in Model.PendingTransactions)
+        {
+            <div class="row border border-success">
+                <div class="col-md-6">
+                    <a href="/api/transactions/@tr.Hash" target="_blank">@tr.Hash</a>
+                </div>
+                <div class="col-md-1">
+                    @tr.Value
+                </div>
+                <div class="col-md-1">
+                    @tr.Fee
+                </div>
+                <div class="col-md-1">
+                    @tr.Nonce
+                </div>
+                <div class="col-md-12 border">
+                    Sender: <a href="/api/accounts/@tr.Sender" target="_blank">@tr.Sender</a> 
+                </div>
+                <div class="col-md-12 border">
+                    Recipient: <a href="/api/accounts/@tr.Recipient" target="_blank">@tr.Recipient</a> 
+                </div>
+            </div> 
+        }
+  </div>
 </div>
