@@ -1,6 +1,7 @@
 ﻿using HackChain.Core.Extensions;
 using HackChain.Core.Model;
 using HackChain.Utilities;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -16,13 +17,53 @@ namespace HackChain.ConsoleTests
         {
             //TestKeys();
 
-            TestTransaction();
+            //TestTransaction();
 
             //TestMinerTransaction();
 
             //TestBlock();
+
+            TestBlockHashing();
         }
 
+        private static void TestBlockHashing()
+        {
+            var genesisBlock = new Block
+            {
+                Index = 1,
+                Difficulty = 5,
+                PreviousBlockHash = "none",
+                Timestamp = 1660632217
+            };
+
+            var coinbaseTransaction =
+                Transaction.Coinbase(
+                "04fbff67f613b7854c63e5b06eee5e880fd2ff618558e97a1cce73778579a94050c0381b973f34c192cba1662459e00902c2fbd5efd358844f964a94c39f69b91b",
+                1, 100);
+
+
+            genesisBlock.Data.Add(coinbaseTransaction);
+
+            var blockForHashing = genesisBlock.SerializeForMining();
+            string hash = string.Empty;
+            string leadingZeroes = new string('0', (int)genesisBlock.Difficulty);
+            long nonce = 0;
+            do
+            {
+                nonce++;
+                hash = CryptoUtilities.CalculateSHA256Hex(blockForHashing.Replace(BlockExtensions.BlockNoncePlaceholder, nonce.ToString()));
+            }
+            while (hash.StartsWith(leadingZeroes) == false);
+
+            genesisBlock.Nonce = nonce;
+            genesisBlock.CurrentBlockHash = hash;
+            genesisBlock.SerializedForMining = blockForHashing.Replace(BlockExtensions.BlockNoncePlaceholder, nonce.ToString());
+
+            var serializedBlock = JsonConvert.SerializeObject(genesisBlock);
+
+            Console.WriteLine(serializedBlock);
+
+        }
 
         private static void TestKeys()
         {

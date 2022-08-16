@@ -121,9 +121,10 @@ namespace HackChain.Core.Services
                 Index = 1,
                 Difficulty =5,
                 PreviousBlockHash = "none",
-                Timestamp = 1660293963,
-                Nonce = 476842,
-                CurrentBlockHash =  "00000f246a37ca30fa35b4e2bf62439c1b88f8d609a1a3244c8332c69614dd87",
+                Timestamp = 1660632217,
+                Nonce = 3763876,
+                CurrentBlockHash = "000000f56c531222a1360097332cdaeb2aa39c05fd703aeb65cc4b4b0d9244c2",
+                SerializedForMining = "{\"Index\": 1,\"Timestamp\": 1660632217,\"Data\": [{\"Sender\":\"\",\"Recipient\":\"04fbff67f613b7854c63e5b06eee5e880fd2ff618558e97a1cce73778579a94050c0381b973f34c192cba1662459e00902c2fbd5efd358844f964a94c39f69b91b\",\"Nonce\":1,\"Data\":\"\",\"Value\":100,\"Fee\":0,\"Hash\":\"8dacfd6cf7021fea26d1e3c482db3219ab03e78124ef96e31d32fc7cdded6172\",\"Signature\":\"Coinbase\"}],\"PreviousBlockHash\": \"none\",\"Nonce\": 3763876,\"Difficulty\": 5}",
                 Data = new List<Transaction> { 
                     new Transaction { 
                         Sender = "",
