@@ -13,13 +13,13 @@ export default {
     },
   },
   actions: {
-    init({ commit, dispatch, rootGetters }, { accounts = [], nodes = [] } = {}) {
-      console.log('tuk11');
+    init(
+      { commit, dispatch, rootGetters },
+      { accounts = [], nodes = [] } = {}
+    ) {
       const mainnet = rootGetters["nodes/active"];
       if (!nodes.length) {
         const node = new Node(mainnet.id, mainnet.url);
-
-        console.log(node instanceof Account);
 
         nodes.push(node);
       }
@@ -28,9 +28,8 @@ export default {
         accounts = accounts.map((a) => {
           if (!(a instanceof Account)) {
             a = new Account(a.privateKey);
+            commit("accounts/add", a, { root: true });
           }
-
-          commit("accounts/add", a, { root: true });
 
           return a;
         });
@@ -39,8 +38,6 @@ export default {
       const wallet = new Wallet({
         nodes,
       });
-
-      // TODO: get cached selected node
 
       const selectedNode = mainnet.id;
 
@@ -89,11 +86,18 @@ export default {
         return false;
       }
 
-      // console.log("accounts", accounts);
-
-      console.log('tuk');
-
       return dispatch("init", { accounts, nodes });
+    },
+
+    selectAccount({ state, commit }, { address, idx }) {
+      state.instance.selectAccount(address);
+      commit("accounts/select", idx, { root: true });
+    },
+
+    exportPrivKey({ rootGetters }) {
+      alert(
+        `Your private key is:  ${rootGetters["accounts/active"].privateKey}`
+      );
     },
   },
 };

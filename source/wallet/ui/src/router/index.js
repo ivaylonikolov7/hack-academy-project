@@ -23,14 +23,14 @@ const router = createRouter({
       path: "/send",
       name: "send",
       component: Send,
-    }
+    },
   ],
 });
 
 router.beforeEach((to, from, next) => {
-  if (store.state.wallet.instance && to.path === "/login") {
-    return next({ name: "home" });
-  }
+  // if (store.state.wallet.instance && to.path === "/login") {
+  //   return next({ name: "home" });
+  // }
 
   if (to.meta && to.meta.requiresLogin && !store.state.wallet.instance) {
     return next({ name: "login" });
