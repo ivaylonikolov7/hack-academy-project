@@ -1,17 +1,17 @@
 ## Backend
 
 ```
-yarn install
+npm install
 ```
 
 To build the project:
 ```
-yarn run build
+npm run build
 ```
 
 To start the server:
 ```
-yarn run start
+npm run start
 ```
 
 ## Database

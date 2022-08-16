@@ -5,10 +5,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { Address } from './models/address-schema';
 import cors from 'cors';
-
-import Node from "../../../wallet/core/node";
-import Account from "../../../wallet/core/account";
-import Wallet from "../../../wallet/core/wallet";
+import { Account, Node, Wallet } from hackchain-wallet-core;
 
 dotenv.config();
 
