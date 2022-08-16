@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HackChain.Core.Migrations
 {
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -32,7 +32,8 @@ namespace HackChain.Core.Migrations
                     PreviousBlockHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Nonce = table.Column<long>(type: "bigint", nullable: false),
                     Difficulty = table.Column<long>(type: "bigint", nullable: false),
-                    CurrentBlockHash = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CurrentBlockHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SerializedForMining = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
