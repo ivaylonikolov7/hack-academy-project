@@ -1,9 +1,12 @@
-import { Container, Link, Box } from "@chakra-ui/react";
+import { Container, Link, Box, Heading } from "@chakra-ui/react";
 import { Link as ReachLink } from "react-router-dom";
 
 export const Layout = function (props: any) {
   return (
     <Container background="#fff" maxWidth={"1000px"}>
+      <Heading textAlign="center" marginBottom="30px">
+        HackChain
+      </Heading>
       <Box display="flex" gap="10px" justifyContent="center">
         <Link as={ReachLink} to="/">
           Home
