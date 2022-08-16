@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HackChain.Core.Migrations
 {
     [DbContext(typeof(HackChainDbContext))]
-    [Migration("20220816010042_initial")]
+    [Migration("20220816010659_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,7 +64,6 @@ namespace HackChain.Core.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SerializedForMining")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("Timestamp")

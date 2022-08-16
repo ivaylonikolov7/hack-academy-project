@@ -33,7 +33,7 @@ namespace HackChain.Core.Migrations
                     Nonce = table.Column<long>(type: "bigint", nullable: false),
                     Difficulty = table.Column<long>(type: "bigint", nullable: false),
                     CurrentBlockHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SerializedForMining = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    SerializedForMining = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

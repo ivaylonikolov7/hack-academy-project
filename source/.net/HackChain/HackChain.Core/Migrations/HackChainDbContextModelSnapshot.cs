@@ -61,6 +61,9 @@ namespace HackChain.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SerializedForMining")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long>("Timestamp")
                         .HasColumnType("bigint");
 

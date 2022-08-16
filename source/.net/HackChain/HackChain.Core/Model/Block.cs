@@ -12,7 +12,7 @@ namespace HackChain.Core.Model
         public long Nonce { get; set; }
         public long Difficulty { get; set; }
         public string CurrentBlockHash { get; set; }
-        public string SerializedForMining { get; set; }
+        public string? SerializedForMining { get; set; }
 
         public Block()
         {
