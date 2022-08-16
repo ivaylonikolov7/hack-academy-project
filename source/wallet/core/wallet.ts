@@ -36,7 +36,7 @@ class Wallet {
         this.selectedNode = nodeId;
     }
 
-    async sendTransaction(rawTx: any) {
+    async sendTransaction(rawTx: any, mine?: boolean) {
         const node = this.nodes.get(this.selectedNode);
         const account = this.accounts.get(this.selectedAccount);
 
@@ -71,7 +71,7 @@ class Wallet {
         tx.setSignature(signature.base64);
         tx.setHash();
 
-        return node.broadcastTransaction(tx.toString());
+        return node.broadcastTransaction(tx.toString(), mine);
     }
 
     async getActiveAccountInfo() {
