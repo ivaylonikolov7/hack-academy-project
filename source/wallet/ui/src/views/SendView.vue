@@ -59,7 +59,7 @@ export default {
         const tx = await this.$store.state.wallet.instance.sendTransaction({
           recipient: this.recipient,
           value: Number(this.amount),
-          fee: Number(this.fee),
+          fee: Number(this.fee) || 0,
         });
         this.success = true;
         this.recipient = null;
@@ -67,6 +67,7 @@ export default {
         this.fee = null;
         this.tx = tx;
       } catch (e) {
+        console.log(e);
         if (e instanceof WalletError) {
           this.error = e.getErrorMessage();
         }

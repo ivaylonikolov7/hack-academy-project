@@ -8,7 +8,7 @@ export default class {
     recipient: string;
     nonce: Number;
     value: Number;
-    fee: Number;
+    fee: Number = 0;
     hash: String;
     signature: String;
     rawTx: Transaction;
@@ -17,8 +17,14 @@ export default class {
         this.sender = sender;
         this.recipient = recipient;
         this.nonce = nonce;
-        this.value = value;
-        this.fee  = fee;
+
+        if (value) {
+            this.value = value;
+        }
+
+        if (fee) {
+            this.fee  = fee;
+        }
     }
 
     public build(): Transaction {
@@ -32,8 +38,6 @@ export default class {
         };
 
         this.hash = sha256(JSON.stringify(transaction));
-
-        // transaction.Hash = this.hash;
 
         this.rawTx = transaction;
 
@@ -57,7 +61,7 @@ export default class {
             throw new WalletError({ error: 'Invalid transaction value', errorCode: 'Transaction_Invalid_Value' });
         }
 
-        if (!this.fee && this.fee !== 0 || (this.fee && !Number(this.fee))) {
+        if ((!this.fee && this.fee !== 0) || (this.fee && !Number(this.fee) && this.fee !== 0)) {
             throw new WalletError({ error: 'Invalid transaction fee', errorCode: 'Transaction_Invalid_Fee' });
         }
     }

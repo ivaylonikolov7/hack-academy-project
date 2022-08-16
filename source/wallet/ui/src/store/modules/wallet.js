@@ -1,6 +1,6 @@
-import Node from "../../../../core/node";
-import Account from "../../../../core/account";
-import Wallet from "../../../../core/wallet";
+import Node from "hackchain-wallet-core/node";
+import Account from "hackchain-wallet-core/account";
+import Wallet from "hackchain-wallet-core/wallet";
 
 export default {
   namespaced: true,

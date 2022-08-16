@@ -1,0 +1,23 @@
+{
+  "name": "hackchain-wallet-cli",
+  "version": "0.1.0",
+  "description": "Simple CLI wallet for HackChain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc"
+  },
+  "author": "Petar Baykov",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^9.4.0",
+    "find-cache-dir": "^3.3.2",
+    "fs-extra": "^10.1.0",
+    "hackchain-wallet-core": "^0.1.5",
+    "open": "^8.4.0",
+    "typescript": "^4.7.4"
+  },
+  "devDependencies": {
+    "@types/find-cache-dir": "^3.2.1"
+  }
+}

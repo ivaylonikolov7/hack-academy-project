@@ -1,8 +1,8 @@
 {
-  "name": "@hackchain/wallet-core",
-  "version": "0.1.0",
-  "description": "Simple CLI wallet for HackChain",
-  "main": "index.js",
+  "name": "hackchain-wallet-core",
+  "version": "0.1.5",
+  "description": "Core wallet functionality for HackChain",
+  "main": "dist",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc"
@@ -13,7 +13,6 @@
     "@types/elliptic": "^6.4.14",
     "@types/node": "^18.0.6",
     "axios": "^0.27.2",
-    "commander": "^9.4.0",
     "elliptic": "^6.5.4",
     "js-sha256": "^0.9.0",
     "typescript": "^4.7.4"
