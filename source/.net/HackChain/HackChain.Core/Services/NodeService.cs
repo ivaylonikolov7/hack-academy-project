@@ -620,6 +620,7 @@ namespace HackChain.Core.Services
         public async Task<IEnumerable<Block>> GetLast(int count)
         {
             var blocks = await _db.Blocks
+                .Include(b => b.Data)
                 .OrderByDescending(b => b.Index)
                 .Take(count)
                 .ToListAsync();

@@ -66,5 +66,15 @@ namespace HackChain.Core.Services
 
             return existingAccount;
         }
+
+        public async Task<IEnumerable<Account>> GetMostFunded(int count)
+        {
+            var accounts = await _db.Accounts
+                .OrderByDescending(a => a.Balance)
+                .Take(count)
+                .ToListAsync();
+
+            return accounts;
+        }
     }
 }

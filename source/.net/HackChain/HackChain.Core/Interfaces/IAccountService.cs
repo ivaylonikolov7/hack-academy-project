@@ -7,5 +7,6 @@ namespace HackChain.Core.Interfaces
         Task<Account> GetAccountByAddress(string address);
         Task ApplyTransactionData(Transaction transaction);
         Task RevertTransactionData(Transaction transaction);
+        Task<IEnumerable<Account>> GetMostFunded(int count);
     }
 }
