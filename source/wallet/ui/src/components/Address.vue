@@ -42,10 +42,12 @@ export default {
       el.select();
       document.execCommand("copy");
       document.body.removeChild(el);
-      this.copied = true;
-      setTimeout(() => {
-        this.copied = false;
-      }, 1000);
+      if (this.copy) {
+        this.copied = true;
+        setTimeout(() => {
+          this.copied = false;
+        }, 1000);
+      }
     },
   },
 };

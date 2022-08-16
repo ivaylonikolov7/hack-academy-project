@@ -36,9 +36,17 @@ class Wallet {
         this.selectedNode = nodeId;
     }
 
-    async sendTransaction(rawTx: any) {
+    async sendTransaction(rawTx: any, mine?: boolean) {
         const node = this.nodes.get(this.selectedNode);
         const account = this.accounts.get(this.selectedAccount);
+
+        if (!node) {
+            throw new WalletError({ error: 'Node is not connected', errorCode: 'Node_Not_Connected' });
+        }
+
+        if (!account) {
+            throw new WalletError({ error: 'No account selected', errorCode: 'No_Active_Account' });
+        }
 
         const accountInfo = await node.getAccountInfo(this.selectedAccount);
 
@@ -63,21 +71,31 @@ class Wallet {
         tx.setSignature(signature.base64);
         tx.setHash();
 
-        return node.broadcastTransaction(tx.toString());
+        return node.broadcastTransaction(tx.toString(), mine);
     }
 
     async getActiveAccountInfo() {
         const node = this.nodes.get(this.selectedNode);
-        const accountInfo = await node.getAccountInfo(this.selectedAccount);
 
-        return accountInfo;
+        if (node) {
+            const accountInfo = await node.getAccountInfo(this.selectedAccount);
+
+            return accountInfo;
+        }
+        
+        return {};
     }
 
     async getAccountTxs() {
         const node = this.nodes.get(this.selectedNode);
-        const txs = await node.getAccountTxs(this.selectedAccount);
 
-        return txs;
+        if (node) {
+            const txs = await node.getAccountTxs(this.selectedAccount);
+
+            return txs;
+        }
+        
+        return [];
     }
 }
 

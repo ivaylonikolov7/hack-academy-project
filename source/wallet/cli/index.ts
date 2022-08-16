@@ -1,16 +1,16 @@
 import { program } from 'commander';
 
-import pkg from '../package.json';
-
-import Wallet from './wallet';
+import pkg from './package.json';
+import Commands from './commands';
 
 program.version(pkg.version, '-v', '--version');
 
 program
     .command('create [alias]')
     .description('Genereate new keypair')
-    .action((alias) => {
+    .action(async (alias) => {
         console.log('generate new account with alias', alias);
+        await Commands.createAccount(alias);
     });
 
 program
@@ -18,10 +18,8 @@ program
     .description('Import existing wallet')
     .option('--mnemonic <mnemonic>', 'Mnemonic')
     .option('--privateKey <privateKey>', 'Private key')
-    .action((alias, options) => {
-        console.log('import account with alias', alias, ' and options', options);
-
-        const wallet = new Wallet({ alias, privateKey: options.privateKey });
+    .action(async (alias, options) => {
+        await Commands.importAccount(alias, options.privateKey);
     });
 
 program
@@ -49,8 +47,8 @@ program
     .option('-s', '--sign', 'Sign tx')
     .option('-o', '--output <file>', 'Output tx if not directly broadcasted')
     .option('-i', '--input <file>', 'Path to local tx file')
-    .action((alias, amount, recipient, options) => {
-        console.log('send', alias, amount, recipient, options);
+    .action(async (alias, amount, recipient, options) => {
+        await Commands.createTransaction(alias, amount, recipient, options.b === true);
     })
 
 

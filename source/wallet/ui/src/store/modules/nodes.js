@@ -10,17 +10,9 @@ export default {
     },
     active: "mainnet",
   },
-  mutations: {
-    set(state, nodes) {
-      console.log(nodes);
-    },
-  },
   getters: {
     active(state) {
       return state.list[state.active];
     },
-  },
-  actions: {
-    
   },
 };

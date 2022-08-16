@@ -3,9 +3,6 @@ import Header from "./components/Header.vue";
 
 export default {
   components: { Header },
-  created() {
-    console.log(this.$store.state.accounts);
-  },
 };
 </script>
 

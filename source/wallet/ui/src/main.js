@@ -5,10 +5,6 @@ import store from "./store";
 
 import "./assets/main.scss";
 
-console.log("in main.js");
-
-console.log("store", store);
-
 store.dispatch("wallet/restore");
 
 const app = createApp(App);

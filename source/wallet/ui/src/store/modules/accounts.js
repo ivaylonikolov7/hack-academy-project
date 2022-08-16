@@ -25,10 +25,16 @@ export default {
     setTransactions(state, transactions) {
       state.transactions = transactions;
     },
+    select(state, idx) {
+      state.active = idx;
+    },
   },
   getters: {
     active(state) {
       return state.list[state.active];
+    },
+    list(state) {
+      return state.list.map((a) => a.publicKey);
     },
   },
   actions: {
@@ -42,7 +48,9 @@ export default {
     async fetchTransactions({ commit, rootState }) {
       const txs = await rootState.wallet.instance.getAccountTxs();
 
-      commit("setTransactions", txs);
+      if (txs) {
+        commit("setTransactions", txs);
+      }
     },
   },
 };

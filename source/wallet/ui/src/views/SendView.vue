@@ -3,8 +3,14 @@
     <div v-if="error" class="errors">
       {{ error }}
     </div>
-    <div v-if="success" class="success">
-      Your transaction is succesfully send. You can explore your transaction at <a href="">explorer url</a>
+    <div v-else-if="success" class="success">
+      Your transaction is succesfully send. You can explore it
+      <a
+        target="_blank"
+        :href="`http://hackchain.pirin.pro/api/transactions/${tx.hash}`"
+      >
+        here
+      </a>
     </div>
     <label>
       Recipient
@@ -36,7 +42,7 @@
 </template>
 
 <script>
-import WalletError from "../../../core/wallet-error";
+import WalletError from "hackchain-wallet-core/wallet-error";
 
 export default {
   data() {
@@ -46,18 +52,26 @@ export default {
       fee: null,
       error: false,
       success: false,
+      tx: null,
     };
   },
   methods: {
     async send() {
       try {
         this.error = false;
-        await this.$store.state.wallet.instance.sendTransaction({
-          recipient: this.recipient,
-          value: Number(this.amount),
-          fee: Number(this.fee),
-        });
+        const tx = await this.$store.state.wallet.instance.sendTransaction(
+          {
+            recipient: this.recipient,
+            value: Number(this.amount),
+            fee: Number(this.fee) || 0,
+          },
+          true
+        );
         this.success = true;
+        this.recipient = null;
+        this.amount = null;
+        this.fee = null;
+        this.tx = tx;
       } catch (e) {
         if (e instanceof WalletError) {
           this.error = e.getErrorMessage();

@@ -10,7 +10,7 @@ class Account {
   public publicKey: string;
   public privateKey: string;
 
-  constructor(privateKey: string) {
+  constructor(privateKey?: string) {
     if (privateKey) {
       this.key = ec.keyFromPrivate(privateKey);
     } else {
