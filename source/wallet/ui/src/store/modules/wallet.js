@@ -58,20 +58,24 @@ export default {
       }, 10000);
     },
 
-    create({ dispatch, commit }) {
+    create({ dispatch, commit, state }) {
       const account = new Account();
 
       commit("accounts/add", account, { root: true });
 
       dispatch("init", { accounts: [account] });
+
+      state.instance.selectAccount(account.publicKey);
     },
 
-    import({ dispatch, commit }, privateKey) {
+    import({ state, dispatch, commit }, privateKey) {
       const account = new Account(privateKey);
 
       commit("accounts/add", account, { root: true });
 
       dispatch("init", { accounts: [account] });
+
+      state.instance.selectAccount(account.publicKey);
     },
 
     restore({ dispatch }) {
@@ -89,9 +93,11 @@ export default {
       return dispatch("init", { accounts, nodes });
     },
 
-    selectAccount({ state, commit }, { address, idx }) {
+    selectAccount({ state, commit, dispatch }, { address, idx }) {
       state.instance.selectAccount(address);
       commit("accounts/select", idx, { root: true });
+      dispatch("accounts/fetchBalances", {}, { root: true });
+      dispatch("accounts/fetchTransactions", {}, { root: true });
     },
 
     exportPrivKey({ rootGetters }) {

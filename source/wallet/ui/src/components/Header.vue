@@ -14,23 +14,42 @@
           :address="$store.getters['accounts/active'].publicKey"
           @click="dropdownOpened = !dropdownOpened"
         />
-        <ul class="list" :class="{ show: dropdownOpened }">
-          <li
-            v-for="(account, k) in $store.getters['accounts/list']"
-            :key="k"
-            @click="
-              $store.dispatch('wallet/selectAccount', {
-                address: account,
-                idx: k,
-              })
-            "
-          >
-            <Address :address="account" />
+        <ul
+          class="list"
+          :class="{ show: dropdownOpened }"
+          @click="dropdownOpened = !dropdownOpened"
+        >
+          <li>
+            <small>Accounts</small>
+            <ul>
+              <li
+                v-for="(account, k) in $store.getters['accounts/list']"
+                :key="k"
+                :class="{
+                  selected: account === $store.getters['accounts/active'].publicKey,
+                }"
+                @click="
+                  $store.dispatch('wallet/selectAccount', {
+                    address: account,
+                    idx: k,
+                  })
+                "
+              >
+                <Address :address="account" />
+              </li>
+            </ul>
           </li>
-          <li @click="$router.push({ name: 'login' })">
-            Import/Add New Account
+          <li>
+            <small>Other</small>
+            <ul>
+              <li @click="$router.push({ name: 'login' })">
+                Import/Add New Account
+              </li>
+              <li @click="$store.dispatch('wallet/exportPrivKey')">
+                Export Private Key
+              </li>
+            </ul>
           </li>
-          <li @click="$store.dispatch('wallet/exportPrivKey')">Export Private Key</li>
         </ul>
       </div>
     </template>
@@ -86,8 +105,29 @@ header {
       }
 
       li {
-        padding: 4px 8px;
         cursor: pointer;
+
+        small {
+          padding-left: 8px;
+          margin: 4px 0;
+          display: inline-block;
+          font-weight: bold;
+          font-size: 12px;
+        }
+
+        ul {
+          padding: 0;
+          margin: 0;
+          li {
+            list-style: none;
+            padding: 8px;
+
+            &:hover,
+            &.selected {
+              background: rgb(229, 229, 229);
+            }
+          }
+        }
       }
     }
   }

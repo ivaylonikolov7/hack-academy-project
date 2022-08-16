@@ -21,12 +21,20 @@
       <input
         v-model="amount"
         type="number"
+        step="1"
         placeholder="Enter amount to send"
+        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
       />
     </label>
     <label>
       Fee
-      <input v-model="fee" type="number" placeholder="Enter fee amount" />
+      <input
+        v-model="fee"
+        type="number"
+        step="1"
+        placeholder="Enter fee amount"
+        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+      />
     </label>
     <div class="btn-container">
       <router-link to="/" class="btn btn-secondary">Back</router-link>

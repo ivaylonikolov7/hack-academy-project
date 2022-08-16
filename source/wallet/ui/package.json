@@ -10,7 +10,7 @@
   "dependencies": {
     "@dicebear/avatars": "^4.10.3",
     "@dicebear/avatars-bottts-sprites": "^4.10.3",
-    "hackchain-wallet-core": "^0.1.7",
+    "hackchain-wallet-core": "^0.1.8",
     "vue": "^3.2.37",
     "vue-router": "^4.1.2",
     "vuex": "^4.0.2"

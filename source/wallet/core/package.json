@@ -1,6 +1,6 @@
 {
   "name": "hackchain-wallet-core",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Core wallet functionality for HackChain",
   "main": "dist",
   "scripts": {

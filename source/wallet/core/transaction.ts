@@ -57,11 +57,11 @@ export default class {
             throw new WalletError({ error: 'Invalid transaction nonce', errorCode: 'Transaction_Invalid_Nonce' });
         }
 
-        if (!this.value || !Number(this.value)) {
+        if (!this.value || !Number(this.value) || (this.value && !Number.isInteger(Number(this.value)))) {
             throw new WalletError({ error: 'Invalid transaction value', errorCode: 'Transaction_Invalid_Value' });
         }
 
-        if ((!this.fee && this.fee !== 0) || (this.fee && !Number(this.fee) && this.fee !== 0)) {
+        if ((!this.fee && this.fee !== 0) || (this.fee && !Number(this.fee) && this.fee !== 0 && !Number.isInteger(Number(this.fee)))) {
             throw new WalletError({ error: 'Invalid transaction fee', errorCode: 'Transaction_Invalid_Fee' });
         }
     }
