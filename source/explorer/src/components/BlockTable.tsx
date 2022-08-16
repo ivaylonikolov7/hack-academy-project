@@ -11,11 +11,15 @@ import {
 import { formatAddress } from "../utils/utils";
 
 export default function BlockTable(props: {
-  index: number;
-  txHeight: number;
-  prevHash: string;
-  difficulty: number;
-  currentHash: string;
+  txs: [
+    {
+      index: number;
+      txHeight: number;
+      prevHash: string;
+      difficulty: number;
+      currentHash: string;
+    }
+  ];
 }) {
   return (
     <>
@@ -41,13 +45,15 @@ export default function BlockTable(props: {
           </Tr>
         </Thead>
         <Tbody>
-          <Tr>
-            <Td>{props.index}</Td>
-            <Td>{props.txHeight}</Td>
-            <Td>{formatAddress(props.currentHash)}</Td>
-            <Td>{props.difficulty}</Td>
-            <Td>{formatAddress(props.prevHash)}</Td>
-          </Tr>
+          {props.txs.map((block) => (
+            <Tr key={block.currentHash}>
+              <Td>{block.index}</Td>
+              <Td>{block.txHeight}</Td>
+              <Td>{formatAddress(block.currentHash)}</Td>
+              <Td>{block.difficulty}</Td>
+              <Td>{formatAddress(block.prevHash)}</Td>
+            </Tr>
+          ))}
         </Tbody>
       </Table>
     </>

@@ -3,9 +3,10 @@ import axios from "axios";
 import { useState } from "react";
 import BlockTable from "../components/BlockTable";
 import { Transactions } from "../components/Transactions";
+import { Layout } from "../layout/Layout";
 
 export const Block = () => {
-  const [height, setHeight] = useState(0);
+  const [txHeight, setTxHeight] = useState(0);
   const [index, setIndex] = useState(0);
   const [currentHash, setCurrentHash] = useState("");
   const [prevHash, setPrevHash] = useState("");
@@ -14,13 +15,7 @@ export const Block = () => {
   const [txs, setTxs] = useState<any[]>([]);
 
   return (
-    <Container
-      background="#fff"
-      maxWidth={{
-        lg: "1000px",
-        md: "1200px",
-      }}
-    >
+    <Layout>
       <Box display="flex" padding="20px 20px">
         <Input
           placeholder="Type your block id here"
@@ -38,7 +33,7 @@ export const Block = () => {
             setPrevHash(response.data.data.previousBlockHash);
             setCurrentHash(response.data.data.currentBlockHash);
             setIndex(response.data.data.index);
-            setHeight(response.data.data.data.length);
+            setTxHeight(response.data.data.data.length);
             setTxs(response.data.data.data);
           }}
         >
@@ -47,14 +42,18 @@ export const Block = () => {
       </Box>
 
       <BlockTable
-        difficulty={difficulty}
-        currentHash={currentHash}
-        prevHash={prevHash}
-        index={index}
-        txHeight={height}
+        txs={[
+          {
+            difficulty,
+            currentHash,
+            prevHash,
+            index,
+            txHeight,
+          },
+        ]}
       ></BlockTable>
 
       <Transactions txs={txs}></Transactions>
-    </Container>
+    </Layout>
   );
 };

@@ -2,6 +2,7 @@ import { Container, Box, Input, Button } from "@chakra-ui/react";
 import axios from "axios";
 import { useState } from "react";
 import { Transactions } from "../components/Transactions";
+import { Layout } from "../layout/Layout";
 import { formatAddress } from "../utils/utils";
 
 export const TransactionsPage = () => {
@@ -12,7 +13,7 @@ export const TransactionsPage = () => {
   const [sender, setSender] = useState("");
 
   return (
-    <Container background="#fff">
+    <Layout background="#fff">
       <Box display="flex" padding="20px 20px">
         <Input
           placeholder="Type your tx here"
@@ -46,6 +47,6 @@ export const TransactionsPage = () => {
           },
         ]}
       ></Transactions>
-    </Container>
+    </Layout>
   );
 };

@@ -15,8 +15,8 @@ export const Layout = function (props: any) {
           <Link as={ReachLink} to="/block">
             Block
           </Link>
-          <Link as={ReachLink} to="/transactions">
-            Block
+          <Link as={ReachLink} to="/transaction">
+            Transaction
           </Link>
         </Box>
         <hr
