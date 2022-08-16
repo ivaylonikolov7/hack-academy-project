@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Container, Input, Box, Button } from "@chakra-ui/react";
+import {
+  Input,
+  Box,
+  Button,
+  FormControl,
+  FormErrorMessage,
+} from "@chakra-ui/react";
 import { AccountTable } from "../components/AccountTable";
 import axios from "axios";
 import { Transactions } from "../components/Transactions";
@@ -10,47 +16,59 @@ export const Account = () => {
   const [account, setAccount] = useState("0");
   const [balance, setBalance] = useState(0);
   const [nonce, setNonce] = useState(0);
-
   const [txs, setTxs] = useState<any[]>([]);
+  const [error, setError] = useState(false);
 
   return (
     <>
       <Layout>
-        <Box display="flex" padding="20px 20px">
-          <Input
-            placeholder="Type your account here"
-            onChange={(e) => {
-              setInputAccount(e.target.value);
-            }}
-          ></Input>
-          <Button
-            marginLeft={"2"}
-            onClick={async () => {
-              let account = await axios.get(
-                "http://hackchain.pirin.pro/api/accounts/" + inputAccount
-              );
-              setBalance(account.data.data.balance);
-              setNonce(account.data.data.nonce);
-              setAccount(account.data.data.address);
+        <Box padding="20px 20px">
+          <FormControl isInvalid={error}>
+            <Input
+              placeholder="Type your account here"
+              onChange={(e) => {
+                setInputAccount(e.target.value);
+              }}
+            ></Input>
+            <Button
+              marginTop="20px"
+              onClick={async () => {
+                let account = await axios.get(
+                  "http://hackchain.pirin.pro/api/accounts/" + inputAccount
+                );
 
-              let accountTxs = await axios.get(
-                "http://hackchain.pirin.pro/api/accounts/" +
-                  inputAccount +
-                  "/transactions"
-              );
-              setTxs(accountTxs.data.data);
-            }}
-          >
-            Send
-          </Button>
+                if (!account.data.data) {
+                  setError(true);
+                  return;
+                }
+                setBalance(account.data.data.balance);
+                setNonce(account.data.data.nonce);
+                setAccount(account.data.data.address);
+
+                let accountTxs = await axios.get(
+                  "http://hackchain.pirin.pro/api/accounts/" +
+                    inputAccount +
+                    "/transactions"
+                );
+                setTxs(accountTxs.data.data);
+              }}
+            >
+              Send
+            </Button>
+            <FormErrorMessage>No such account .</FormErrorMessage>
+          </FormControl>
         </Box>
-        <AccountTable
-          account={account}
-          balance={balance}
-          nonce={nonce}
-        ></AccountTable>
+        {(
+          <>
+            <AccountTable
+              account={account}
+              balance={balance}
+              nonce={nonce}
+            ></AccountTable>
 
-        <Transactions txs={txs}></Transactions>
+            <Transactions txs={txs}></Transactions>
+          </>
+        ) && error}
       </Layout>
     </>
   );

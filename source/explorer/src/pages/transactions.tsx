@@ -1,4 +1,10 @@
-import { Container, Box, Input, Button } from "@chakra-ui/react";
+import {
+  Box,
+  Input,
+  Button,
+  FormControl,
+  FormErrorMessage,
+} from "@chakra-ui/react";
 import axios from "axios";
 import { useState } from "react";
 import { Transactions } from "../components/Transactions";
@@ -11,30 +17,37 @@ export const TransactionsPage = () => {
   const [hash, setHash] = useState("");
   const [value, setValue] = useState("");
   const [sender, setSender] = useState("");
+  const [error, setError] = useState(false);
 
   return (
     <Layout background="#fff">
       <Box display="flex" padding="20px 20px">
-        <Input
-          placeholder="Type your tx here"
-          onChange={(e) => {
-            setTransaction(e.target.value);
-          }}
-        ></Input>
-        <Button
-          marginLeft={"2"}
-          onClick={async () => {
-            let response = await axios.get(
-              "http://hackchain.pirin.pro/api/transactions/" + transaction
-            );
-            setHash(response.data.data.hash);
-            setRecipient(response.data.data.recipient);
-            setValue(response.data.data.value);
-            setSender(response.data.data.sender);
-          }}
-        >
-          Send
-        </Button>
+        <FormControl isInvalid={error}>
+          <Input
+            placeholder="Type your tx here"
+            onChange={(e) => {
+              setTransaction(e.target.value);
+            }}
+          ></Input>
+          <Button
+            marginTop="20px"
+            onClick={async () => {
+              let response = await axios.get(
+                "http://hackchain.pirin.pro/api/transactions/" + transaction
+              );
+              if (!response.data.data) {
+                setError(true);
+              }
+              setHash(response.data.data.hash);
+              setRecipient(response.data.data.recipient);
+              setValue(response.data.data.value);
+              setSender(response.data.data.sender);
+            }}
+          >
+            Send
+          </Button>
+          <FormErrorMessage>No such tx.</FormErrorMessage>
+        </FormControl>
       </Box>
 
       <Transactions

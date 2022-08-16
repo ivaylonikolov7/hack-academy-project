@@ -1,4 +1,10 @@
-import { Container, Box, Input, Button } from "@chakra-ui/react";
+import {
+  Box,
+  Input,
+  Button,
+  FormControl,
+  FormErrorMessage,
+} from "@chakra-ui/react";
 import axios from "axios";
 import { useState } from "react";
 import BlockTable from "../components/BlockTable";
@@ -13,32 +19,41 @@ export const Block = () => {
   const [difficulty, setDifficulty] = useState(0);
   const [blockId, setBlockId] = useState(0);
   const [txs, setTxs] = useState<any[]>([]);
+  const [error, setError] = useState(false);
 
   return (
     <Layout>
       <Box display="flex" padding="20px 20px">
-        <Input
-          placeholder="Type your block id here"
-          onChange={(e) => {
-            setBlockId(parseInt(e.target.value));
-          }}
-        ></Input>
-        <Button
-          marginLeft={"2"}
-          onClick={async () => {
-            let response = await axios.get(
-              "http://hackchain.pirin.pro/api/blocks/" + blockId
-            );
-            setDifficulty(response.data.data.difficulty);
-            setPrevHash(response.data.data.previousBlockHash);
-            setCurrentHash(response.data.data.currentBlockHash);
-            setIndex(response.data.data.index);
-            setTxHeight(response.data.data.data.length);
-            setTxs(response.data.data.data);
-          }}
-        >
-          Send
-        </Button>
+        <FormControl isInvalid={error}>
+          <Input
+            placeholder="Type your block id here"
+            onChange={(e) => {
+              setBlockId(parseInt(e.target.value));
+            }}
+          ></Input>
+          <Button
+            marginTop="20px"
+            onClick={async () => {
+              let response = await axios.get(
+                "http://hackchain.pirin.pro/api/blocks/" + blockId
+              );
+              if (!response.data.data) {
+                console.log(response.data.data);
+                setError(true);
+                return;
+              }
+              setDifficulty(response.data.data.difficulty);
+              setPrevHash(response.data.data.previousBlockHash);
+              setCurrentHash(response.data.data.currentBlockHash);
+              setIndex(response.data.data.index);
+              setTxHeight(response.data.data.data.length);
+              setTxs(response.data.data.data);
+            }}
+          >
+            Send
+          </Button>
+          <FormErrorMessage>No such block .</FormErrorMessage>
+        </FormControl>
       </Box>
 
       <BlockTable
