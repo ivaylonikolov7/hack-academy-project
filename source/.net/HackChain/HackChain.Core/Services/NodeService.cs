@@ -108,6 +108,7 @@ namespace HackChain.Core.Services
         private async Task<Block> GetLastBlock()
         {
             var lastBlock = await _db.Blocks
+                .Include(b => b.Data)
                 .OrderByDescending(b => b.Index)
                 .FirstOrDefaultAsync();
 
