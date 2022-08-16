@@ -34,11 +34,10 @@ export const Block = () => {
           <Button
             marginTop="20px"
             onClick={async () => {
-              let response = await axios.get(
+              const response = await axios.get(
                 "http://hackchain.pirin.pro/api/blocks/" + blockId
               );
               if (!response.data.data) {
-                console.log("here");
                 setError(true);
                 return;
               } else {

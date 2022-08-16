@@ -1,13 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import { ChakraProvider, Link } from "@chakra-ui/react";
+import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "./theme";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Link as ReachLink,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Account } from "./pages/account";
 import { TransactionsPage } from "./pages/transactions";
 import reportWebVitals from "./reportWebVitals";

@@ -33,11 +33,9 @@ export const Account = () => {
             <Button
               marginTop="20px"
               onClick={async () => {
-                let account = await axios.get(
+                const account = await axios.get(
                   "http://hackchain.pirin.pro/api/accounts/" + inputAccount
                 );
-
-                console.log(account);
 
                 if (!account.data.data) {
                   setError(true);
@@ -49,7 +47,7 @@ export const Account = () => {
                 setNonce(account.data.data.nonce);
                 setAccount(account.data.data.address);
 
-                let accountTxs = await axios.get(
+                const accountTxs = await axios.get(
                   "http://hackchain.pirin.pro/api/accounts/" +
                     inputAccount +
                     "/transactions"

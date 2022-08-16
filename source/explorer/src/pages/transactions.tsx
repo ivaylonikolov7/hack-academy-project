@@ -32,7 +32,7 @@ export const TransactionsPage = () => {
           <Button
             marginTop="20px"
             onClick={async () => {
-              let response = await axios.get(
+              const response = await axios.get(
                 "http://hackchain.pirin.pro/api/transactions/" + transaction
               );
               if (!response.data.data) {
