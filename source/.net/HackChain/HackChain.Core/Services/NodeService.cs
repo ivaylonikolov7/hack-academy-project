@@ -447,9 +447,9 @@ namespace HackChain.Core.Services
                     foreach (var block in _remoteCandidateChain)
                     {
                         await UpdateAccounts(block);
+                        _db.Blocks.Add(block);
+                        await _db.SaveChangesAsync();
                     }
-                    _db.Blocks.AddRange(_remoteCandidateChain);
-                    await _db.SaveChangesAsync();
 
                     dbTransaction.Commit();
                 }

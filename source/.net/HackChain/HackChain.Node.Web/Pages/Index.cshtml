@@ -16,6 +16,8 @@
             <dd class="col-sm-8">@Model.Status.BaseUrl</dd>
             <dt class="col-sm-4">Status</dt>
             <dd class="col-sm-8">@Model.Status.Status</dd>
+            <dt class="col-sm-4">Mining</dt>
+            <dd class="col-sm-8">@Model.Status.IsMining</dd>
         </dl>
         <dl class="col-md-4">
             <dt class="col-sm-8">Processed Transactions</dt>
@@ -35,6 +37,19 @@
         </dl>
     </div>
     
+    <div class="row border border-success">
+        <h4>Actions</h4>
+        <div class="col-md-4">
+            <button id="btnMine">Mine</button>
+        </div>
+        <div class="col-md-8">
+            <label for="tbBlockindex">Block index:</label>
+            <input id="tbBlockindex" />
+            <label for="tbPeerNodeUrl">Peer Node Url:</label>
+            <input id="tbPeerNodeUrl" />
+            <button id="btnSync">Sync</button>
+        </div>
+    </div>
   <div class="row">
     <div class="col-md-8">
       <h4>Blocks</h4>
@@ -50,6 +65,9 @@
           </div>
           <div class="col-md-2">
               Transactions
+          </div>
+          <div class="col-md-2">
+              Nonce
           </div>
           <div class="col-md-2">
               Hash
@@ -69,6 +87,10 @@
                 </div>
                 <div class="col-md-2">
                     @block.Data.Count
+                </div>
+                <div class="col-md-2 d-flex justify-content-between">
+                    <span></span>
+                    <span>@block.Nonce.ToString("N0")</span>
                 </div>
                 <div class="col-md-2">
                     @block.CurrentBlockHash
@@ -156,3 +178,49 @@
         }
   </div>
 </div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script>
+    $(document).ready(function(){
+        var $btnMine = $("#btnMine");
+        var $btnSync = $("#btnSync");
+        var $tbBlockindex = $("#tbBlockindex");
+        var $tbPeerNodeUrl = $("#tbPeerNodeUrl");
+
+        function attachEventHanlders(){
+            $btnMine.on("click", handleMine)
+
+            $btnSync.on("click", handleSync)
+        }
+
+        function handleMine(){
+            fetch("/api/blocks/mine", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              }
+            })
+
+            window.location.reload();
+        }
+
+        function handleSync() {
+            var blockIndex = $tbBlockindex.val();
+            var peerNodeUrl = $tbPeerNodeUrl.val();
+            var payload = {
+	            "blockINdex": blockIndex,
+	            "peerNodeUrl": peerNodeUrl
+            };
+
+            fetch("/api/blocks/add", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload)
+            })
+        }
+
+        attachEventHanlders();
+    })
+</script>
