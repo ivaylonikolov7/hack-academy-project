@@ -28,6 +28,9 @@ export default {
     select(state, idx) {
       state.active = idx;
     },
+    selectLatest(state) {
+      state.active = state.list.length - 1;
+    },
   },
   getters: {
     active(state) {

@@ -48,7 +48,7 @@ const createTransaction = async (alias: string, amount: Number, recipient: strin
         recipient: recipient,
         value: Number(amount),
         fee: 0,
-    });
+    }, true);
 
     if (tx?.hash) {
         await open(`http://hackchain.pirin.pro/api/transactions/${tx.hash}`);

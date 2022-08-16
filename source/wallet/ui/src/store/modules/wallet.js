@@ -60,22 +60,18 @@ export default {
 
     create({ dispatch, commit, state }) {
       const account = new Account();
-
       commit("accounts/add", account, { root: true });
-
       dispatch("init", { accounts: [account] });
-
       state.instance.selectAccount(account.publicKey);
+      commit("accounts/selectLatest", {}, { root: true });
     },
 
     import({ state, dispatch, commit }, privateKey) {
       const account = new Account(privateKey);
-
       commit("accounts/add", account, { root: true });
-
       dispatch("init", { accounts: [account] });
-
       state.instance.selectAccount(account.publicKey);
+      commit("accounts/selectLatest", {}, { root: true });
     },
 
     restore({ dispatch }) {
