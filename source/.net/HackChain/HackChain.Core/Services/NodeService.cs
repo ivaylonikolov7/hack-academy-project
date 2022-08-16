@@ -16,8 +16,7 @@ namespace HackChain.Core.Services
         private static Dictionary<string, PeerNode> _peers = new Dictionary<string, PeerNode>();
         private static bool _isMining = false;
         private static NodeStatusType _nodeStatusType;
-        private const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
-
+        
         private List<Block> _remoteCandidateChain;
         private List<Block> _localChainForUpdatingReverse;
         private Dictionary<string, Account> _accounts;
@@ -153,19 +152,20 @@ namespace HackChain.Core.Services
 
         private void CalculateBlockHash(Block block)
         {
-            var blockForHashing = block.SerializeForMining(BlockNoncePlaceholder);
+            var blockForHashing = block.SerializeForMining();
             string hash = string.Empty;
             string leadingZeroes = new string('0', (int)block.Difficulty);
             long nonce = 0;
             do
             {
                 nonce++;
-                hash = CryptoUtilities.CalculateSHA256Hex(blockForHashing.Replace(BlockNoncePlaceholder, nonce.ToString()));
+                hash = CryptoUtilities.CalculateSHA256Hex(blockForHashing.Replace(BlockExtensions.BlockNoncePlaceholder, nonce.ToString()));
             }
             while (hash.StartsWith(leadingZeroes) == false);
 
             block.Nonce = nonce;
             block.CurrentBlockHash = hash;
+            block.SerializedForMining = blockForHashing.Replace(BlockExtensions.BlockNoncePlaceholder, nonce.ToString());
         }
 
         public async Task<NodeStatus> GetNodeStatus()
@@ -566,8 +566,7 @@ namespace HackChain.Core.Services
             remoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlockIndex);
             remoteBlock = _mapper.Map<Block>(remoteBlockDTO);
 
-            // proccessing block with index larger than latest local block
-            while (currentLocalBlock.Index < remoteBlockIndex)
+            while (currentLocalBlock.CurrentBlockHash != remoteBlock.CurrentBlockHash)
             {
                 var previousRemoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlockIndex - 1);
                 previousRemoteBlock = _mapper.Map<Block>(previousRemoteBlockDTO);
@@ -575,26 +574,34 @@ namespace HackChain.Core.Services
                 remoteBlock.Validate(_settings.Difficulty, _settings.CoinbaseValue, previousRemoteBlock);
 
                 _remoteCandidateChain.Add(remoteBlock);
+                
+
+                if(currentLocalBlock.Index == remoteBlock.Index)
+                {
+                    _localChainForUpdatingReverse.Add(currentLocalBlock);
+                    currentLocalBlock = await GetBlockByIndex(currentLocalBlock.Index - 1);
+                }
+
                 remoteBlockIndex--;
                 remoteBlock = previousRemoteBlock;
             }
 
-            remoteBlock = _remoteCandidateChain.Last();
-            // looking for common previous local and previous remote block
-            while (currentLocalBlock.CurrentBlockHash != remoteBlock.PreviousBlockHash)
-            {
-                long newIndex = currentLocalBlock.Index--;
-                currentLocalBlock = await GetBlockByIndex(newIndex);
+            //remoteBlock = _remoteCandidateChain.Last();
+            //// looking for common previous local and previous remote block
+            //while (currentLocalBlock.CurrentBlockHash != remoteBlock.PreviousBlockHash)
+            //{
+            //    long newIndex = currentLocalBlock.Index--;
+            //    currentLocalBlock = await GetBlockByIndex(newIndex);
 
-                var previousRemoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlock.Index - 1);
-                previousRemoteBlock = _mapper.Map<Block>(previousRemoteBlockDTO);
+            //    var previousRemoteBlockDTO = await nodeConnector.GetBlockByIndex(remoteBlock.Index - 1);
+            //    previousRemoteBlock = _mapper.Map<Block>(previousRemoteBlockDTO);
 
-                remoteBlock.Validate(_settings.Difficulty, _settings.CoinbaseValue, previousRemoteBlock);
+            //    remoteBlock.Validate(_settings.Difficulty, _settings.CoinbaseValue, previousRemoteBlock);
 
-                _remoteCandidateChain.Add(remoteBlock);
-                _localChainForUpdatingReverse.Add(currentLocalBlock);
-                remoteBlock = previousRemoteBlock;
-            }
+            //    _remoteCandidateChain.Add(remoteBlock);
+            //    _localChainForUpdatingReverse.Add(currentLocalBlock);
+            //    remoteBlock = previousRemoteBlock;
+            //}
 
             _remoteCandidateChain.Reverse();
         }
@@ -607,6 +614,16 @@ namespace HackChain.Core.Services
         public void PropagateBlock(Block block)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<Block>> GetLast(int count)
+        {
+            var blocks = await _db.Blocks
+                .OrderByDescending(b => b.Index)
+                .Take(count)
+                .ToListAsync();
+
+            return blocks;
         }
     }
 }

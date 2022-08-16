@@ -6,6 +6,7 @@ namespace HackChain.Core.Interfaces
     {
         Task Init();
         Task<Block> GetBlockByIndex(long index);
+        Task<IEnumerable<Block>> GetLast(int count);    
         Task<Block> MineBlock();
         Task<NodeStatus> GetNodeStatus();
         Task<IEnumerable<PeerNode>> GetPeerNodes();

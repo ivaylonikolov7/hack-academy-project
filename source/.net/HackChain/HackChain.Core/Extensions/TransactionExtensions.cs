@@ -15,6 +15,12 @@ namespace HackChain.Core.Extensions
 
             return result;
         }
+        public static string SerializeForBlockHashing(this Transaction tr)
+        {
+            var result = $"{{\"Sender\":\"{tr.Sender}\",\"Recipient\":\"{tr.Recipient}\",\"Nonce\":{tr.Nonce},\"Data\":\"{tr.Data}\",\"Value\":{tr.Value},\"Fee\":{tr.Fee},\"Hash\":\"{tr.Hash}\",\"Signature\":\"{tr.Signature}\"}}";
+
+            return result;
+        }
         public static string Serialize(this Transaction transaction, Formatting formating = Formatting.Indented)
         {
             JsonSerializerSettings settings = new JsonSerializerSettings

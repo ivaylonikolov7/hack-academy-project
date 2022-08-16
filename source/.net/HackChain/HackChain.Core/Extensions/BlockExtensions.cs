@@ -9,17 +9,19 @@ namespace HackChain.Core.Extensions
 {
     public static class BlockExtensions
     {
+        public const string BlockNoncePlaceholder = "BlockNoncePlaceholder";
         public static string SerializeForHashing(this Block b)
         {
-            var dataString = $"{string.Join(',', b.Data.Select(t => t.SerializeForHashing()))}]";
-            var result = $"{{\"Index\": {b.Index},\"Timestamp\": {b.Timestamp},\"Data\": [{dataString}],\"PreviousBlockHash\": \"{ b.PreviousBlockHash}\",\"Nonce\": {b.Nonce},\"Difficulty\": {b.Difficulty}}}";
+
+            var dataString = b.SerializeForMining();
+            var result = dataString.Replace(BlockNoncePlaceholder, b.Nonce.ToString());
 
             return result;
         }
-        public static string SerializeForMining(this Block b, string noncePlaceholder)
+        public static string SerializeForMining(this Block b)
         {
-            var dataString = $"{string.Join(',', b.Data.Select(t => t.SerializeForHashing()))}]";
-            var result = $"{{\"Index\": {b.Index},\"Timestamp\": {b.Timestamp},\"Data\": [{dataString}],\"PreviousBlockHash\": \"{ b.PreviousBlockHash}\",\"Nonce\": {noncePlaceholder},\"Difficulty\": {b.Difficulty}}}";
+            var dataString = $"{string.Join(',', b.Data.Select(t => t.SerializeForBlockHashing()))}";
+            var result = $"{{\"Index\": {b.Index},\"Timestamp\": {b.Timestamp},\"Data\": [{dataString}],\"PreviousBlockHash\": \"{ b.PreviousBlockHash}\",\"Nonce\": {BlockNoncePlaceholder},\"Difficulty\": {b.Difficulty}}}";
 
             return result;
         }

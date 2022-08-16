@@ -30,6 +30,21 @@ namespace HackChain.Node.Web.Controllers
             return ApiResponse<BlockDTO>.Successful(result);
         }
 
+        [Route("getlast/{count}")]
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<IEnumerable<BlockDTO>>>> GetLast(int count)
+        {
+            if(count > 50)
+            {
+                count = 50;
+            }
+
+            var blocks = await _nodeService.GetLast(count);
+            var result = _mapper.Map<IEnumerable<BlockDTO>>(blocks);
+
+            return ApiResponse<IEnumerable<BlockDTO>>.Successful(result);
+        }
+
         [Route("mine")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<BlockDTO>>> Mine()

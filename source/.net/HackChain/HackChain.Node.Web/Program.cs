@@ -35,6 +35,7 @@ namespace HackChain.Node.Web
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IWalletService, WalletService>();
+            services.AddScoped<INodeSyncService, NodeSyncService>();
 
             var settings = new HackChainSettings();
             configuration.Bind("HackChainSettings", settings);
@@ -92,10 +93,7 @@ namespace HackChain.Node.Web
             {
                 var setting = scope.ServiceProvider.GetRequiredService<HackChainSettings>();
                 var nodeService = scope.ServiceProvider.GetRequiredService<INodeService>();
-                if (setting.InitOnStartup)
-                {
-                    await nodeService.Init();
-                }
+                await nodeService.Init();
             }
         }
     }
