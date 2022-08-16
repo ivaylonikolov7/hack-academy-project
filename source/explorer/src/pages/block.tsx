@@ -38,9 +38,11 @@ export const Block = () => {
                 "http://hackchain.pirin.pro/api/blocks/" + blockId
               );
               if (!response.data.data) {
-                console.log(response.data.data);
+                console.log("here");
                 setError(true);
                 return;
+              } else {
+                setError(false);
               }
               setDifficulty(response.data.data.difficulty);
               setPrevHash(response.data.data.previousBlockHash);
@@ -56,19 +58,23 @@ export const Block = () => {
         </FormControl>
       </Box>
 
-      <BlockTable
-        txs={[
-          {
-            difficulty,
-            currentHash,
-            prevHash,
-            index,
-            txHeight,
-          },
-        ]}
-      ></BlockTable>
+      {!error && (
+        <>
+          <BlockTable
+            txs={[
+              {
+                difficulty,
+                currentHash,
+                prevHash,
+                index,
+                txHeight,
+              },
+            ]}
+          ></BlockTable>
 
-      <Transactions txs={txs}></Transactions>
+          <Transactions txs={txs}></Transactions>
+        </>
+      )}
     </Layout>
   );
 };

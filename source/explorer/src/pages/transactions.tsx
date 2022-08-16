@@ -50,16 +50,18 @@ export const TransactionsPage = () => {
         </FormControl>
       </Box>
 
-      <Transactions
-        txs={[
-          {
-            sender: formatAddress(sender),
-            recipient: formatAddress(recipient),
-            value,
-            hash: formatAddress(hash),
-          },
-        ]}
-      ></Transactions>
+      {!error && (
+        <Transactions
+          txs={[
+            {
+              sender: formatAddress(sender),
+              recipient: formatAddress(recipient),
+              value,
+              hash: formatAddress(hash),
+            },
+          ]}
+        ></Transactions>
+      )}
     </Layout>
   );
 };

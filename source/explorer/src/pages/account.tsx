@@ -37,9 +37,13 @@ export const Account = () => {
                   "http://hackchain.pirin.pro/api/accounts/" + inputAccount
                 );
 
+                console.log(account);
+
                 if (!account.data.data) {
                   setError(true);
                   return;
+                } else {
+                  setError(false);
                 }
                 setBalance(account.data.data.balance);
                 setNonce(account.data.data.nonce);
@@ -58,7 +62,7 @@ export const Account = () => {
             <FormErrorMessage>No such account .</FormErrorMessage>
           </FormControl>
         </Box>
-        {(
+        {!error && (
           <>
             <AccountTable
               account={account}
@@ -68,7 +72,7 @@ export const Account = () => {
 
             <Transactions txs={txs}></Transactions>
           </>
-        ) && error}
+        )}
       </Layout>
     </>
   );
