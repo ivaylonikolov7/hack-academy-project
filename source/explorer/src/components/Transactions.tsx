@@ -42,7 +42,7 @@ export const Transactions = (props: { txs: any[] }) => {
                 <Td>{formatAddress(tx.sender)}</Td>
                 <Td>{formatAddress(tx.recipient)}</Td>
                 <Td>{tx.value}</Td>
-                <Td>{tx.fee}</Td>
+                <Td>{tx.fee || 0}</Td>
               </Tr>
             );
           })}
