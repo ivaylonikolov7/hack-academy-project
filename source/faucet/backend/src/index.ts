@@ -5,15 +5,11 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { Address } from './models/address-schema';
 import cors from 'cors';
-import { Account, Node, Wallet } from hackchain-wallet-core;
+import Wallet from 'hackchain-wallet-core/dist/wallet';
+import Account from 'hackchain-wallet-core/dist/account';
+import Node from "hackchain-wallet-core/dist/node";
 
 dotenv.config();
-
-if (typeof btoa === 'undefined') {
-  global.btoa = function (str) {
-    return Buffer.from(str, 'binary').toString('base64');
-  };
-}
 
 const app: Express = express();
 app.use(express.urlencoded({ extended: true }));
@@ -32,6 +28,7 @@ const fee = process.env.AMOUNT || 1;
 // console.log(account.key.getPrivate('hex'));
 // console.log(account.key.getPublic().encode('hex'));
 // END
+
 const account = new Account(privateKey);
 const nodes = [];
 const node = new Node(chainId, chainUrl);
@@ -54,7 +51,7 @@ app.use(cors({ origin: true }));
 
 app.post('/send', async (req: Request, res: Response, next: NextFunction) => {
   /* For demo purposes the following function is in a comment.
-  For real situation should be uncommented and one transaction could be made from one ip once per day */
+  For real situation should be uncommented and one transaction could be made from one address once per day */
   // const date = new Date(); 
   // date.setDate(date.getDate() - 1);
   // let user = await Address.findOne({ address: req.body.address });

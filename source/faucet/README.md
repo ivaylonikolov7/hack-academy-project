@@ -1,5 +1,7 @@
 # FAUCET
-intro bla bla This project is for...
+This project contains faucet for Hack Academy Blockchain. 
+
+You need to provide publick key and the faucet will send some test tokens.
 
 ## Usage
 
